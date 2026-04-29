@@ -7,7 +7,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <Sidebar />
       <div className="lg:ml-[250px] flex flex-col min-h-screen">
         <Header />
-        <main className="flex-1">{children}</main>
+        <main className="flex-1 max-w-[1400px] mx-auto w-full">{children}</main>
       </div>
     </div>
   );

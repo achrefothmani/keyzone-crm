@@ -3,7 +3,7 @@ import { Search, HelpCircle, Bell } from "lucide-react";
 export function Header() {
   return (
     <header className="sticky top-0 z-20 bg-canvas/80 backdrop-blur-xl border-b border-line">
-      <div className="flex items-center gap-6 h-[72px] px-10">
+      <div className="flex items-center justify-between gap-6 h-[72px] px-10 max-w-[1400px] mx-auto w-full">
         {/* Search */}
         <div className="flex-1 max-w-xl">
           <div className="group relative flex items-center h-11 rounded-[12px] border border-line bg-surface/60 transition-all duration-200 ease-smooth focus-within:bg-canvas focus-within:border-gold focus-within:shadow-focus">
