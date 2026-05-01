@@ -1,9 +1,15 @@
+"use client";
+
 import Image from "next/image";
+import Link from "next/link";
 import { Bed, Bath, Square, MapPin, Eye, Pencil, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { formatPrice, formatRelative } from "@/lib/utils";
-import type { Property } from "@/lib/data";
+import type { Property } from "@/lib/types";
 import { cn } from "@/lib/utils";
+
+const FALLBACK_IMAGE =
+  "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1200&q=80&auto=format&fit=crop";
 
 const statusTone: Record<Property["status"], "success" | "info" | "warning" | "neutral"> = {
   Disponible: "success",
@@ -18,7 +24,20 @@ const validationTone: Record<Property["validation"], "gold" | "warning" | "neutr
   Brouillon: "neutral",
 };
 
-export function PropertyRow({ p, index }: { p: Property; index: number }) {
+function coverImage(p: Property): string {
+  if (!p.images || p.images.length === 0) return FALLBACK_IMAGE;
+  return (p.images.find((i) => i.is_cover) ?? p.images[0]).url;
+}
+
+export function PropertyRow({
+  p,
+  index,
+  onDelete,
+}: {
+  p: Property;
+  index: number;
+  onDelete?: (id: string) => void;
+}) {
   const isVente = p.vocation === "Vente";
 
   return (
@@ -34,7 +53,7 @@ export function PropertyRow({ p, index }: { p: Property; index: number }) {
       {/* Image */}
       <div className="relative w-full md:w-[260px] aspect-[16/10] md:aspect-auto md:h-auto flex-shrink-0 bg-surface overflow-hidden">
         <Image
-          src={p.image}
+          src={coverImage(p)}
           alt={p.title}
           fill
           sizes="260px"
@@ -54,9 +73,7 @@ export function PropertyRow({ p, index }: { p: Property; index: number }) {
             <Badge tone={statusTone[p.status]} dot>
               {p.status}
             </Badge>
-            <Badge tone={validationTone[p.validation]}>
-              {p.validation}
-            </Badge>
+            <Badge tone={validationTone[p.validation]}>{p.validation}</Badge>
             <span className="text-[11px] text-ink-soft">{p.type}</span>
           </div>
 
@@ -66,32 +83,36 @@ export function PropertyRow({ p, index }: { p: Property; index: number }) {
 
           <div className="flex items-center gap-1.5 text-[13px] text-ink-muted">
             <MapPin className="w-3.5 h-3.5 text-gold" strokeWidth={1.75} />
-            <span>{p.neighborhood}</span>
-            <span className="text-ink-soft">·</span>
+            {p.neighborhood ? <span>{p.neighborhood}</span> : null}
+            {p.neighborhood ? <span className="text-ink-soft">·</span> : null}
             <span>{p.city}</span>
           </div>
         </div>
 
-        <div className="mt-4 flex items-center gap-5 text-[12px] text-ink-muted">
-          {p.bedrooms > 0 && (
+        <div className="mt-4 flex items-center gap-5 text-[12px] text-ink-muted flex-wrap">
+          {p.bedrooms && p.bedrooms > 0 ? (
             <span className="inline-flex items-center gap-1.5">
               <Bed className="w-3.5 h-3.5" strokeWidth={1.6} />
               {p.bedrooms} chambres
             </span>
-          )}
-          <span className="inline-flex items-center gap-1.5">
-            <Bath className="w-3.5 h-3.5" strokeWidth={1.6} />
-            {p.bathrooms} salles d’eau
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <Square className="w-3.5 h-3.5" strokeWidth={1.6} />
-            {p.surface} m²
-          </span>
-          {p.furnished && (
+          ) : null}
+          {p.bathrooms && p.bathrooms > 0 ? (
+            <span className="inline-flex items-center gap-1.5">
+              <Bath className="w-3.5 h-3.5" strokeWidth={1.6} />
+              {p.bathrooms} salles d&rsquo;eau
+            </span>
+          ) : null}
+          {p.surface ? (
+            <span className="inline-flex items-center gap-1.5">
+              <Square className="w-3.5 h-3.5" strokeWidth={1.6} />
+              {p.surface} m²
+            </span>
+          ) : null}
+          {p.furnished ? (
             <span className="inline-flex items-center gap-1.5 text-gold-deep">
               <span className="w-1.5 h-1.5 rounded-full bg-gold" /> Meublé
             </span>
-          )}
+          ) : null}
         </div>
       </div>
 
@@ -107,28 +128,33 @@ export function PropertyRow({ p, index }: { p: Property; index: number }) {
           <div className="mt-3 flex items-center justify-end gap-2 text-[11px] text-ink-soft tabular-nums">
             <span>{p.reference}</span>
             <span>·</span>
-            <span>maj {formatRelative(p.updatedAt)}</span>
+            <span>maj {formatRelative(p.updated_at)}</span>
           </div>
         </div>
 
         <div className="mt-5 flex items-center justify-end gap-1">
-          <button
-            type="button"
-            aria-label="Voir"
-            className="flex items-center justify-center w-9 h-9 rounded-[8px] text-ink-muted hover:bg-canvas hover:text-gold-deep hover:shadow-card transition-all"
-          >
-            <Eye className="w-4 h-4" strokeWidth={1.6} />
-          </button>
-          <button
-            type="button"
-            aria-label="Modifier"
-            className="flex items-center justify-center w-9 h-9 rounded-[8px] text-ink-muted hover:bg-canvas hover:text-ink hover:shadow-card transition-all"
-          >
-            <Pencil className="w-4 h-4" strokeWidth={1.6} />
-          </button>
+          <Link href={`/proprietes/${p.id}`}>
+            <button
+              type="button"
+              aria-label="Voir"
+              className="flex items-center justify-center w-9 h-9 rounded-[8px] text-ink-muted hover:bg-canvas hover:text-gold-deep hover:shadow-card transition-all"
+            >
+              <Eye className="w-4 h-4" strokeWidth={1.6} />
+            </button>
+          </Link>
+          <Link href={`/proprietes/${p.id}/modifier`}>
+            <button
+              type="button"
+              aria-label="Modifier"
+              className="flex items-center justify-center w-9 h-9 rounded-[8px] text-ink-muted hover:bg-canvas hover:text-ink hover:shadow-card transition-all"
+            >
+              <Pencil className="w-4 h-4" strokeWidth={1.6} />
+            </button>
+          </Link>
           <button
             type="button"
             aria-label="Supprimer"
+            onClick={() => onDelete?.(p.id)}
             className="flex items-center justify-center w-9 h-9 rounded-[8px] text-ink-muted hover:bg-canvas hover:text-danger hover:shadow-card transition-all"
           >
             <Trash2 className="w-4 h-4" strokeWidth={1.6} />
