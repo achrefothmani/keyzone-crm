@@ -39,7 +39,9 @@ export function setToken(token: string | null) {
 let unauthorizedHandler: (() => void) | null = null;
 
 export function setUnauthorizedHandler(handler: (() => void) | null) {
-  unauthorizedHandler = handler;
+  if (typeof window !== "undefined") {
+    unauthorizedHandler = handler;
+  }
 }
 
 type RequestOptions = {
@@ -78,7 +80,7 @@ async function request<T>(path: string, opts: RequestOptions = {}): Promise<T> {
     cache: "no-store",
   });
 
-  if (res.status === 401 && !opts.anonymous) {
+  if (res.status === 401 && !opts.anonymous && typeof window !== "undefined") {
     unauthorizedHandler?.();
   }
 
