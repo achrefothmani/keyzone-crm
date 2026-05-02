@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import { PageHeading } from "@/features/dashboard/PageHeading";
 import { FiltersCard } from "@/features/dashboard/FiltersCard";
 import { KpiGrid } from "@/features/dashboard/KpiGrid";
@@ -5,8 +8,11 @@ import { RecentProperties } from "@/features/dashboard/RecentProperties";
 import { Button } from "@/components/ui/Button";
 import { Download, Plus } from "lucide-react";
 import Link from "next/link";
+import type { PropertyFilters } from "@/lib/types";
 
 export default function DashboardPage() {
+  const [filters, setFilters] = useState<PropertyFilters>({});
+
   return (
     <div className="px-10 py-10 space-y-10 max-w-[1400px]">
       <PageHeading
@@ -27,9 +33,12 @@ export default function DashboardPage() {
         }
       />
 
-      <FiltersCard />
+      <FiltersCard 
+        onFilter={(f) => setFilters(f)} 
+        onReset={() => setFilters({})} 
+      />
       <KpiGrid />
-      <RecentProperties />
+      <RecentProperties filters={filters} />
     </div>
   );
 }

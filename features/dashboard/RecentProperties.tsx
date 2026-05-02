@@ -1,21 +1,35 @@
-import { properties, type Property } from "@/lib/data";
-import { Badge } from "@/components/ui/Badge";
-import { formatPrice } from "@/lib/utils";
-import { Bed, Bath, Square, MapPin, ArrowUpRight } from "lucide-react";
+"use client";
+
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { Bed, Bath, Square, MapPin, ArrowUpRight } from "lucide-react";
+
+import { Badge } from "@/components/ui/Badge";
+import { formatPrice, getMediaUrl } from "@/lib/utils";
+import { propertiesApi } from "@/lib/api";
+import type { Property, PropertyFilters } from "@/lib/types";
+
+const FALLBACK_IMAGE =
+  "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1200&q=80&auto=format&fit=crop";
+
+function coverImage(p: Property): string {
+  if (!p.images || p.images.length === 0) return FALLBACK_IMAGE;
+  const url = (p.images.find((i) => i.is_cover) ?? p.images[0]).url;
+  return getMediaUrl(url);
+}
 
 function PropertyCard({ p, index }: { p: Property; index: number }) {
   const isVente = p.vocation === "Vente";
   return (
     <Link
-      href={`/proprietes`}
+      href="/proprietes"
       className="group relative flex flex-col rounded-[14px] border border-line bg-canvas overflow-hidden transition-all duration-300 ease-smooth hover:border-gold/40 hover:shadow-lift hover:-translate-y-0.5 animate-fade-up"
       style={{ animationDelay: `${index * 80}ms` }}
     >
       <div className="relative aspect-[16/10] overflow-hidden bg-surface">
         <Image
-          src={p.image}
+          src={coverImage(p)}
           alt={p.title}
           fill
           sizes="(max-width: 768px) 100vw, 33vw"
@@ -38,8 +52,8 @@ function PropertyCard({ p, index }: { p: Property; index: number }) {
       <div className="flex flex-col flex-1 p-5">
         <div className="flex items-center gap-1.5 text-[12px] text-ink-muted">
           <MapPin className="w-3.5 h-3.5 text-gold" strokeWidth={1.75} />
-          <span>{p.neighborhood}</span>
-          <span className="text-ink-soft">·</span>
+          {p.neighborhood ? <span>{p.neighborhood}</span> : null}
+          {p.neighborhood ? <span className="text-ink-soft">·</span> : null}
           <span>{p.city}</span>
         </div>
 
@@ -48,20 +62,24 @@ function PropertyCard({ p, index }: { p: Property; index: number }) {
         </h3>
 
         <div className="mt-3 flex items-center gap-4 text-[12px] text-ink-muted">
-          {p.bedrooms > 0 && (
+          {p.bedrooms && p.bedrooms > 0 ? (
             <span className="inline-flex items-center gap-1.5">
               <Bed className="w-3.5 h-3.5" strokeWidth={1.6} />
               {p.bedrooms} ch.
             </span>
-          )}
-          <span className="inline-flex items-center gap-1.5">
-            <Bath className="w-3.5 h-3.5" strokeWidth={1.6} />
-            {p.bathrooms} sdb
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <Square className="w-3.5 h-3.5" strokeWidth={1.6} />
-            {p.surface} m²
-          </span>
+          ) : null}
+          {p.bathrooms && p.bathrooms > 0 ? (
+            <span className="inline-flex items-center gap-1.5">
+              <Bath className="w-3.5 h-3.5" strokeWidth={1.6} />
+              {p.bathrooms} sdb
+            </span>
+          ) : null}
+          {p.surface ? (
+            <span className="inline-flex items-center gap-1.5">
+              <Square className="w-3.5 h-3.5" strokeWidth={1.6} />
+              {p.surface} m²
+            </span>
+          ) : null}
         </div>
 
         <div className="mt-5 pt-5 border-t border-line-soft flex items-end justify-between">
@@ -71,20 +89,39 @@ function PropertyCard({ p, index }: { p: Property; index: number }) {
             </div>
             <div className="font-display text-[22px] font-medium tracking-tight text-ink mt-0.5 tabular-nums">
               {formatPrice(p.price)}
-              {!isVente && <span className="text-[12px] text-ink-muted font-sans"> /mois</span>}
+              {!isVente && (
+                <span className="text-[12px] text-ink-muted font-sans"> /mois</span>
+              )}
             </div>
           </div>
-          <div className="text-[11px] text-ink-soft tabular-nums">
-            {p.reference}
-          </div>
+          <div className="text-[11px] text-ink-soft tabular-nums">{p.reference}</div>
         </div>
       </div>
     </Link>
   );
 }
 
-export function RecentProperties() {
-  const recent = properties.slice(0, 3);
+export function RecentProperties({ filters = {} }: { filters?: PropertyFilters }) {
+  const [items, setItems] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setLoading(true);
+    propertiesApi
+      .list({ 
+        ...filters,
+        limit: 3, 
+        sort_by: "created_at", 
+        sort_dir: "desc" 
+      })
+      .then((res) => setItems(res.items))
+      .catch((err) =>
+        setError(err instanceof Error ? err.message : "Erreur de chargement"),
+      )
+      .finally(() => setLoading(false));
+  }, [filters]);
+
   return (
     <section className="space-y-6">
       <div className="flex items-end justify-between gap-6">
@@ -106,11 +143,35 @@ export function RecentProperties() {
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-        {recent.map((p, i) => (
-          <PropertyCard key={p.id} p={p} index={i} />
-        ))}
-      </div>
+      {error ? (
+        <div className="rounded-[12px] border border-red-200/60 bg-red-50 px-5 py-4 text-[13px] text-red-700">
+          {error}
+        </div>
+      ) : null}
+
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div
+              key={i}
+              className="h-[420px] rounded-[14px] border border-line bg-elevated/40 animate-pulse"
+            />
+          ))}
+        </div>
+      ) : items.length === 0 ? (
+        <div className="rounded-[14px] border border-line bg-canvas px-8 py-16 text-center">
+          <p className="text-[15px] font-medium text-ink">Aucun bien</p>
+          <p className="mt-1 text-[13px] text-ink-muted">
+            Créez votre première annonce pour la voir ici.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+          {items.map((p, i) => (
+            <PropertyCard key={p.id} p={p} index={i} />
+          ))}
+        </div>
+      )}
     </section>
   );
 }
