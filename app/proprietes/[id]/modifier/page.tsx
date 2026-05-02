@@ -105,9 +105,10 @@ export default function UpdatePropertyPage() {
         });
 
         setPhotos(property.images.map(img => ({
-          id: Math.random().toString(36).substring(7),
+          id: img.id,
           url: img.url,
-          is_cover: img.is_cover
+          is_cover: img.is_cover,
+          status: 'done'
         })));
 
       } catch (err) {
@@ -146,7 +147,9 @@ export default function UpdatePropertyPage() {
       owner_phone: owner.owner_phone.trim() || null,
       owner_email: owner.owner_email.trim() || null,
       responsible_id: info.responsible_id || null,
-      images: photos.map((p) => ({ url: p.url, is_cover: p.is_cover })),
+      images: photos
+        .filter(p => p.status !== 'pending')
+        .map((p) => ({ url: p.url, is_cover: p.is_cover })),
     };
   }
 
@@ -197,7 +200,7 @@ export default function UpdatePropertyPage() {
               variant="outline"
               iconLeft={<Save />}
               disabled={submitting}
-              onClick={() => void submit("Brouillon")}
+              onClick={() => void submit("En attente de validation")}
             >
               Enregistrer
             </Button>
@@ -237,7 +240,7 @@ export default function UpdatePropertyPage() {
             value={owner}
             onChange={(patch) => setOwner((prev) => ({ ...prev, ...patch }))}
           />
-          <PhotosUpload value={photos} onChange={setPhotos} />
+          <PhotosUpload value={photos} onChange={setPhotos} propertyId={id} />
           <Timeline />
         </aside>
       </div>

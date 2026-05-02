@@ -93,3 +93,8 @@ export function useAuth(): AuthContextValue {
   if (!ctx) throw new Error("useAuth must be used inside <AuthProvider>");
   return ctx;
 }
+
+export function canValidate(user: User | null): boolean {
+  if (!user) return false;
+  return user.role === "CHEF_AGENCE" || user.role === "COORDINATEUR";
+}

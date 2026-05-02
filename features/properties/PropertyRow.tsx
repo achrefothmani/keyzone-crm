@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Bed, Bath, Square, MapPin, Eye, Pencil, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
-import { formatPrice, formatRelative } from "@/lib/utils";
+import { formatPrice, formatRelative, getMediaUrl } from "@/lib/utils";
 import type { Property } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -18,15 +18,15 @@ const statusTone: Record<Property["status"], "success" | "info" | "warning" | "n
   Réservé: "warning",
 };
 
-const validationTone: Record<Property["validation"], "gold" | "warning" | "neutral"> = {
+const validationTone: Record<Property["validation"], "gold" | "warning"> = {
   Validée: "gold",
-  "En attente": "warning",
-  Brouillon: "neutral",
+  "En attente de validation": "warning",
 };
 
 function coverImage(p: Property): string {
   if (!p.images || p.images.length === 0) return FALLBACK_IMAGE;
-  return (p.images.find((i) => i.is_cover) ?? p.images[0]).url;
+  const url = (p.images.find((i) => i.is_cover) ?? p.images[0]).url;
+  return getMediaUrl(url);
 }
 
 export function PropertyRow({
@@ -56,6 +56,7 @@ export function PropertyRow({
           src={coverImage(p)}
           alt={p.title}
           fill
+          unoptimized
           sizes="260px"
           className="object-cover transition-transform duration-700 ease-smooth group-hover:scale-105"
         />
