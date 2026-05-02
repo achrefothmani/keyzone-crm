@@ -1,119 +1,190 @@
 "use client";
 
+import { useState, useRef } from "react";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
-import { UploadCloud, ImageIcon, X, Star } from "lucide-react";
-import { useState } from "react";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/Button";
+import { Star, X, Upload, Loader2 } from "lucide-react";
+import { propertiesApi } from "@/lib/api";
+import { getMediaUrl } from "@/lib/utils";
+import { Lightbox } from "@/components/ui/Lightbox";
 
-const initialPhotos = [
-  {
-    id: "p1",
-    url: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=600&q=80&auto=format&fit=crop",
-    main: true,
-  },
-  {
-    id: "p2",
-    url: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&q=80&auto=format&fit=crop",
-  },
-  {
-    id: "p3",
-    url: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=600&q=80&auto=format&fit=crop",
-  },
-];
+export type PhotoEntry = { 
+  id?: string; 
+  url: string; 
+  is_cover: boolean;
+  file?: File;
+  status?: 'pending' | 'uploading' | 'done' | 'error';
+};
 
-export function PhotosUpload() {
-  const [dragOver, setDragOver] = useState(false);
-  const [photos] = useState(initialPhotos);
+export function PhotosUpload({
+  value,
+  onChange,
+  propertyId,
+}: {
+  value: PhotoEntry[];
+  onChange: (next: PhotoEntry[]) => void;
+  propertyId?: string;
+}) {
+  const [isUploading, setIsUploading] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    if (propertyId) {
+      // Direct upload for existing property
+      setIsUploading(true);
+      try {
+        const nextValue = [...value];
+        const uploads = await Promise.all(
+          files.map(async (file, index) => {
+            const isCover = nextValue.length === 0 && index === 0;
+            const img = await propertiesApi.uploadImage(propertyId, file, isCover);
+            return {
+              id: img.id,
+              url: img.url,
+              is_cover: img.is_cover,
+              status: 'done' as const,
+            };
+          })
+        );
+        onChange([...value, ...uploads]);
+      } catch (err) {
+        console.error("Upload failed", err);
+      } finally {
+        setIsUploading(false);
+      }
+    } else {
+      // Local preview for new property
+      const next = [...value];
+      for (const file of files) {
+        const url = URL.createObjectURL(file);
+        next.push({
+          url,
+          is_cover: next.length === 0,
+          file,
+          status: 'pending',
+        });
+      }
+      onChange(next);
+    }
+    
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
+
+  function remove(index: number) {
+    const photo = value[index];
+    if (photo.file && photo.status === 'pending') {
+      URL.revokeObjectURL(photo.url);
+    }
+    const next = value.filter((_, i) => i !== index);
+    if (next.length > 0 && !next.some((p) => p.is_cover)) {
+      next[0].is_cover = true;
+    }
+    onChange(next);
+  }
+
+  function setCover(index: number) {
+    onChange(value.map((p, i) => ({ ...p, is_cover: i === index })));
+  }
 
   return (
     <Card>
       <CardHeader
         title="Photos"
-        description="JPG, PNG ou WebP, jusqu’à 10 Mo par image."
+        description="Téléversez les photos du bien."
         action={
           <span className="text-[12px] text-ink-muted tabular-nums">
-            {photos.length}/20
+            {value.length}/20
           </span>
         }
       />
       <CardBody className="space-y-5">
-        <div
-          onDragOver={(e) => {
-            e.preventDefault();
-            setDragOver(true);
-          }}
-          onDragLeave={() => setDragOver(false)}
-          onDrop={(e) => {
-            e.preventDefault();
-            setDragOver(false);
-          }}
-          className={cn(
-            "relative flex flex-col items-center justify-center gap-3 rounded-[12px] border-2 border-dashed bg-elevated/50 px-6 py-10 text-center cursor-pointer",
-            "transition-all duration-200 ease-smooth",
-            dragOver
-              ? "border-gold bg-gold-mist"
-              : "border-line hover:border-gold/40 hover:bg-gold-mist/40",
-          )}
-        >
-          <div
-            className={cn(
-              "flex items-center justify-center w-12 h-12 rounded-full transition-colors",
-              dragOver ? "bg-gold text-white" : "bg-canvas text-gold border border-gold/20",
-            )}
+        <div className="flex items-center gap-2">
+          <input
+            type="file"
+            ref={fileInputRef}
+            className="hidden"
+            accept="image/*"
+            multiple
+            onChange={handleFileChange}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            iconLeft={isUploading ? <Loader2 className="animate-spin" /> : <Upload />}
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploading}
           >
-            <UploadCloud className="w-5 h-5" strokeWidth={1.75} />
-          </div>
-          <div className="space-y-1">
-            <p className="text-[14px] font-medium text-ink">
-              Glissez-déposez vos photos
-              <span className="text-ink-muted font-normal"> ou </span>
-              <span className="text-gold-deep underline-offset-4 underline decoration-gold/40">
-                parcourez vos fichiers
-              </span>
-            </p>
-            <p className="text-[12px] text-ink-muted">
-              Conseillé&nbsp;: 8 photos minimum, 1920×1280 px
-            </p>
-          </div>
+            {isUploading ? "Envoi en cours..." : "Téléverser des photos"}
+          </Button>
         </div>
 
-        {/* Existing photos grid */}
-        <div className="grid grid-cols-3 gap-3">
-          {photos.map((photo) => (
-            <div
-              key={photo.id}
-              className="relative aspect-square rounded-[10px] overflow-hidden bg-surface ring-1 ring-line group"
-            >
-              {/* Using img instead of Image to avoid extra config noise; small thumbs */}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={photo.url}
-                alt=""
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-              {photo.main ? (
-                <span className="absolute top-2 left-2 inline-flex items-center gap-1 rounded-full bg-gold text-white px-2 py-0.5 text-[10px] font-medium">
-                  <Star className="w-3 h-3" strokeWidth={2} fill="currentColor" />
-                  Principale
-                </span>
-              ) : null}
-              <button
-                type="button"
-                aria-label="Supprimer"
-                className="absolute top-2 right-2 w-7 h-7 rounded-full bg-canvas/90 backdrop-blur flex items-center justify-center text-ink hover:text-danger transition-colors opacity-0 group-hover:opacity-100"
+        {value.length === 0 ? (
+          <p className="text-[12px] text-ink-soft text-center py-6">
+            Aucune photo. Téléversez des fichiers pour les ajouter.
+          </p>
+        ) : (
+          <div className="grid grid-cols-3 gap-3">
+            {value.map((photo, i) => (
+              <div
+                key={`${photo.url}-${i}`}
+                className="relative aspect-square rounded-[10px] overflow-hidden bg-surface ring-1 ring-line group cursor-pointer"
+                onClick={() => setLightboxIndex(i)}
               >
-                <X className="w-3.5 h-3.5" strokeWidth={2} />
-              </button>
-            </div>
-          ))}
-          <button
-            type="button"
-            className="aspect-square rounded-[10px] border-2 border-dashed border-line bg-elevated/40 flex flex-col items-center justify-center gap-2 text-ink-muted hover:border-gold/40 hover:text-gold transition-colors"
-          >
-            <ImageIcon className="w-5 h-5" strokeWidth={1.5} />
-            <span className="text-[11px] font-medium">Ajouter</span>
-          </button>
-        </div>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={getMediaUrl(photo.url)}
+                  alt=""
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                {photo.status === 'pending' && (
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                    <span className="text-[10px] text-white font-medium bg-black/40 px-2 py-1 rounded">À envoyer</span>
+                  </div>
+                )}
+                {photo.is_cover ? (
+                  <span className="absolute top-2 left-2 inline-flex items-center gap-1 rounded-full bg-gold text-white px-2 py-0.5 text-[10px] font-medium shadow-sm">
+                    <Star className="w-3 h-3" strokeWidth={2} fill="currentColor" />
+                    Principale
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setCover(i);
+                    }}
+                    className="absolute top-2 left-2 inline-flex items-center gap-1 rounded-full bg-canvas/90 backdrop-blur text-ink-muted px-2 py-0.5 text-[10px] font-medium opacity-0 group-hover:opacity-100 hover:text-gold-deep transition shadow-sm"
+                  >
+                    Définir
+                  </button>
+                )}
+                <button
+                  type="button"
+                  aria-label="Supprimer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    remove(i);
+                  }}
+                  className="absolute top-2 right-2 w-7 h-7 rounded-full bg-canvas/90 backdrop-blur flex items-center justify-center text-ink hover:text-danger transition-colors opacity-0 group-hover:opacity-100 shadow-sm"
+                >
+                  <X className="w-3.5 h-3.5" strokeWidth={2} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <Lightbox
+          images={value.map(p => ({ url: p.url, is_cover: p.is_cover }))}
+          initialIndex={lightboxIndex ?? 0}
+          isOpen={lightboxIndex !== null}
+          onClose={() => setLightboxIndex(null)}
+        />
       </CardBody>
     </Card>
   );
