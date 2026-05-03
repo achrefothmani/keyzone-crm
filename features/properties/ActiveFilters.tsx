@@ -10,9 +10,27 @@ interface ActiveFiltersProps {
   onClearAll: () => void;
 }
 
+const LABELS: Record<string, string> = {
+  search: "Recherche",
+  type: "Type",
+  vocation: "Vocation",
+  status: "Statut",
+  city: "Ville",
+  neighborhood: "Quartier",
+  furnished: "Meublé",
+  min_price: "Prix min",
+  max_price: "Prix max",
+  min_surface: "Surface min",
+  max_surface: "Surface max",
+  rooms: "Pièces",
+  bedrooms: "Chambres",
+  bathrooms: "Salles de bain",
+  responsible_id: "Responsable",
+};
+
 export function ActiveFilters({ filters, onRemove, onClearAll }: ActiveFiltersProps) {
   const activeKeys = (Object.keys(filters) as (keyof PropertyFilters)[]).filter(
-    (key) => key !== "search" && key !== "limit" && key !== "offset" && filters[key] !== undefined && filters[key] !== ""
+    (key) => key !== "limit" && key !== "offset" && filters[key] !== undefined && filters[key] !== ""
   );
 
   if (activeKeys.length === 0) return null;
@@ -22,7 +40,7 @@ export function ActiveFilters({ filters, onRemove, onClearAll }: ActiveFiltersPr
       {activeKeys.map((key) => (
         <Badge key={key} tone="gold" className="pl-3 pr-1.5 py-1 flex items-center gap-1">
           <span className="text-[11px] font-medium">
-            {key}: {String(filters[key])}
+            {LABELS[key] || key}: {String(filters[key])}
           </span>
           <button
             onClick={() => onRemove(key)}

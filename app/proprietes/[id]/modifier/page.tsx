@@ -10,7 +10,7 @@ import { PropertyInfoForm, type PropertyInfo } from "@/features/new-listing/Prop
 import { LocationForm, type LocationInfo } from "@/features/new-listing/LocationForm";
 import { OwnerForm, type OwnerInfo } from "@/features/new-listing/OwnerForm";
 import { PhotosUpload, type PhotoEntry } from "@/features/new-listing/PhotosUpload";
-import { Timeline } from "@/features/new-listing/Timeline";
+import { PropertyHistory } from "@/features/properties/PropertyHistory";
 import { Button } from "@/components/ui/Button";
 import { ApiError, propertiesApi, usersApi } from "@/lib/api";
 import type { Property, PropertyCreatePayload, PropertyValidation, User } from "@/lib/types";
@@ -249,7 +249,9 @@ export default function UpdatePropertyPage() {
             onChange={(patch) => setOwner((prev) => ({ ...prev, ...patch }))}
           />
           <PhotosUpload value={photos} onChange={setPhotos} propertyId={id} />
-          <Timeline />
+          <div className="rounded-[14px] border border-line bg-canvas p-6 shadow-sm">
+            <PropertyHistory propertyId={id} />
+          </div>
         </aside>
       </div>
 

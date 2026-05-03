@@ -23,7 +23,7 @@ function PropertyCard({ p, index }: { p: Property; index: number }) {
   const isVente = p.vocation === "Vente";
   return (
     <Link
-      href="/proprietes"
+      href={`/proprietes/${p.id}`}
       className="group relative flex flex-col rounded-[14px] border border-line bg-canvas overflow-hidden transition-all duration-300 ease-smooth hover:border-gold/40 hover:shadow-lift hover:-translate-y-0.5 animate-fade-up"
       style={{ animationDelay: `${index * 80}ms` }}
     >

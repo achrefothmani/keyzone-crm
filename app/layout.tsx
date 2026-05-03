@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Inter, Fraunces } from "next/font/google";
 import "./globals.css";
 import { AppShell } from "@/components/layout/AppShell";
+import { AuthProvider } from "@/lib/auth";
+import { AuthGuard } from "@/components/auth/AuthGuard";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -28,9 +30,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="fr" className={`${inter.variable} ${fraunces.variable}`}>
-      <body className="font-sans bg-canvas text-ink antialiased">
-        <AppShell>{children}</AppShell>
+    <html lang="fr" className={`${inter.variable} ${fraunces.variable}`} suppressHydrationWarning>
+      <body className="font-sans bg-canvas text-ink antialiased" suppressHydrationWarning>
+        <AuthProvider>
+          <AuthGuard>
+            <AppShell>{children}</AppShell>
+          </AuthGuard>
+        </AuthProvider>
       </body>
     </html>
   );

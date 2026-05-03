@@ -21,11 +21,11 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
       >
         <select
           ref={ref}
-          defaultValue={props.defaultValue ?? ""}
           className={cn(
             "appearance-none flex-1 bg-transparent text-sm text-ink",
             "pl-3.5 pr-10 outline-none cursor-pointer",
           )}
+          {...(props.value === undefined && { defaultValue: props.defaultValue ?? "" })}
           {...props}
         >
           {placeholder ? (

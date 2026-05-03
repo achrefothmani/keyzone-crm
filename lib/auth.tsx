@@ -95,6 +95,5 @@ export function useAuth(): AuthContextValue {
 }
 
 export function canValidate(user: User | null): boolean {
-  if (!user) return false;
-  return user.role === "CHEF_AGENCE" || user.role === "COORDINATEUR";
+  return !!user;
 }

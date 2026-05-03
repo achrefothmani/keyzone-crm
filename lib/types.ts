@@ -46,6 +46,15 @@ export type PropertyImage = {
   created_at: string;
 };
 
+export type PropertyHistory = {
+  id: string;
+  property_id: string;
+  user: PropertyResponsible | null;
+  action: string;
+  changes: Record<string, { old: any; new: any }> | null;
+  created_at: string;
+};
+
 export type PropertyResponsible = {
   id: string;
   nom: string;

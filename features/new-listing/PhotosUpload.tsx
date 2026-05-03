@@ -20,16 +20,20 @@ export function PhotosUpload({
   value,
   onChange,
   propertyId,
+  readOnly = false,
 }: {
   value: PhotoEntry[];
-  onChange: (next: PhotoEntry[]) => void;
+  onChange?: (next: PhotoEntry[]) => void;
   propertyId?: string;
+  readOnly?: boolean;
 }) {
   const [isUploading, setIsUploading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    if (readOnly || !onChange) return;
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
@@ -74,8 +78,22 @@ export function PhotosUpload({
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
-  function remove(index: number) {
+  async function remove(index: number) {
+    if (readOnly || !onChange) return;
     const photo = value[index];
+    
+    if (propertyId && photo.id && photo.status === 'done') {
+      setIsDeleting(photo.id);
+      try {
+        await propertiesApi.removeImage(propertyId, photo.id);
+      } catch (err) {
+        console.error("Delete failed", err);
+        return;
+      } finally {
+        setIsDeleting(null);
+      }
+    }
+
     if (photo.file && photo.status === 'pending') {
       URL.revokeObjectURL(photo.url);
     }
@@ -86,7 +104,19 @@ export function PhotosUpload({
     onChange(next);
   }
 
-  function setCover(index: number) {
+  async function setCover(index: number) {
+    if (readOnly || !onChange) return;
+    const photo = value[index];
+    
+    if (propertyId && photo.id && photo.status === 'done') {
+      try {
+        await propertiesApi.setCoverImage(propertyId, photo.id);
+      } catch (err) {
+        console.error("Failed to set cover image", err);
+        return; // Don't update local state if API fails
+      }
+    }
+
     onChange(value.map((p, i) => ({ ...p, is_cover: i === index })));
   }
 
@@ -94,7 +124,7 @@ export function PhotosUpload({
     <Card>
       <CardHeader
         title="Photos"
-        description="Téléversez les photos du bien."
+        description={readOnly ? "Photos du bien immobilier." : "Téléversez les photos du bien."}
         action={
           <span className="text-[12px] text-ink-muted tabular-nums">
             {value.length}/20
@@ -102,33 +132,35 @@ export function PhotosUpload({
         }
       />
       <CardBody className="space-y-5">
-        <div className="flex items-center gap-2">
-          <input
-            type="file"
-            ref={fileInputRef}
-            className="hidden"
-            accept="image/*"
-            multiple
-            onChange={handleFileChange}
-          />
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full"
-            iconLeft={isUploading ? <Loader2 className="animate-spin" /> : <Upload />}
-            onClick={() => fileInputRef.current?.click()}
-            disabled={isUploading}
-          >
-            {isUploading ? "Envoi en cours..." : "Téléverser des photos"}
-          </Button>
-        </div>
+        {!readOnly && (
+          <div className="flex items-center gap-2">
+            <input
+              type="file"
+              ref={fileInputRef}
+              className="hidden"
+              accept="image/*"
+              multiple
+              onChange={handleFileChange}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              iconLeft={isUploading ? <Loader2 className="animate-spin" /> : <Upload />}
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploading}
+            >
+              {isUploading ? "Envoi en cours..." : "Téléverser des photos"}
+            </Button>
+          </div>
+        )}
 
         {value.length === 0 ? (
           <p className="text-[12px] text-ink-soft text-center py-6">
-            Aucune photo. Téléversez des fichiers pour les ajouter.
+            Aucune photo. {readOnly ? "" : "Téléversez des fichiers pour les ajouter."}
           </p>
         ) : (
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-4 gap-3">
             {value.map((photo, i) => (
               <div
                 key={`${photo.url}-${i}`}
@@ -146,34 +178,43 @@ export function PhotosUpload({
                     <span className="text-[10px] text-white font-medium bg-black/40 px-2 py-1 rounded">À envoyer</span>
                   </div>
                 )}
+                {isDeleting === photo.id && (
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                    <Loader2 className="w-6 h-6 text-white animate-spin" />
+                  </div>
+                )}
                 {photo.is_cover ? (
                   <span className="absolute top-2 left-2 inline-flex items-center gap-1 rounded-full bg-gold text-white px-2 py-0.5 text-[10px] font-medium shadow-sm">
                     <Star className="w-3 h-3" strokeWidth={2} fill="currentColor" />
                     Principale
                   </span>
                 ) : (
+                  !readOnly && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCover(i);
+                      }}
+                      className="absolute top-2 left-2 inline-flex items-center gap-1 rounded-full bg-canvas/90 backdrop-blur text-ink-muted px-2 py-0.5 text-[10px] font-medium opacity-0 group-hover:opacity-100 hover:text-gold-deep transition shadow-sm"
+                    >
+                      Définir
+                    </button>
+                  )
+                )}
+                {!readOnly && (
                   <button
                     type="button"
+                    aria-label="Supprimer"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setCover(i);
+                      remove(i);
                     }}
-                    className="absolute top-2 left-2 inline-flex items-center gap-1 rounded-full bg-canvas/90 backdrop-blur text-ink-muted px-2 py-0.5 text-[10px] font-medium opacity-0 group-hover:opacity-100 hover:text-gold-deep transition shadow-sm"
+                    className="absolute top-2 right-2 w-7 h-7 rounded-full bg-canvas/90 backdrop-blur flex items-center justify-center text-ink hover:text-danger transition-colors opacity-0 group-hover:opacity-100 shadow-sm"
                   >
-                    Définir
+                    <X className="w-3.5 h-3.5" strokeWidth={2} />
                   </button>
                 )}
-                <button
-                  type="button"
-                  aria-label="Supprimer"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    remove(i);
-                  }}
-                  className="absolute top-2 right-2 w-7 h-7 rounded-full bg-canvas/90 backdrop-blur flex items-center justify-center text-ink hover:text-danger transition-colors opacity-0 group-hover:opacity-100 shadow-sm"
-                >
-                  <X className="w-3.5 h-3.5" strokeWidth={2} />
-                </button>
               </div>
             ))}
           </div>

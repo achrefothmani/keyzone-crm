@@ -29,3 +29,13 @@ export function formatRelative(value: string) {
   if (diff < day * 7) return `il y a ${Math.floor(diff / day)} jours`;
   return formatDate(value);
 }
+
+export function getMediaUrl(url: string | null | undefined): string {
+  if (!url) return "";
+  if (url.startsWith("http") || url.startsWith("blob:") || url.startsWith("data:")) {
+    return url;
+  }
+  // Base URL for uploads - adjusting to the user's example port 8009
+  const base = process.env.NEXT_PUBLIC_MEDIA_URL || "http://localhost:8009";
+  return `${base}${url.startsWith("/") ? "" : "/"}${url}`;
+}

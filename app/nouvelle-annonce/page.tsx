@@ -19,7 +19,6 @@ import {
   PhotosUpload,
   type PhotoEntry,
 } from "@/features/new-listing/PhotosUpload";
-import { Timeline } from "@/features/new-listing/Timeline";
 import { Button } from "@/components/ui/Button";
 import { ApiError, propertiesApi, usersApi } from "@/lib/api";
 import type {
@@ -206,7 +205,6 @@ export default function NewListingPage() {
             onChange={(patch) => setOwner((prev) => ({ ...prev, ...patch }))}
           />
           <PhotosUpload value={photos} onChange={setPhotos} />
-          <Timeline />
         </aside>
       </div>
 

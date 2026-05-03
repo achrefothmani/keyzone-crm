@@ -4,6 +4,7 @@ import type {
   Property,
   PropertyCreatePayload,
   PropertyFilters,
+  PropertyHistory,
   PropertyImage,
   User,
   UserCreatePayload,
@@ -45,7 +46,7 @@ export function setUnauthorizedHandler(handler: (() => void) | null) {
 }
 
 type RequestOptions = {
-  method?: "GET" | "POST" | "PUT" | "DELETE";
+  method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
   body?: unknown;
   query?: Record<string, string | number | boolean | undefined | null>;
   /** Don't attach Authorization header. */
@@ -184,6 +185,9 @@ export const propertiesApi = {
   listImages: (id: string) =>
     request<PropertyImage[]>(`/properties/${id}/images`),
 
+  getHistory: (id: string) =>
+    request<PropertyHistory[]>(`/properties/${id}/history`),
+
   addImage: (id: string, payload: { url: string; is_cover?: boolean }) =>
     request<PropertyImage>(`/properties/${id}/images`, {
       method: "POST",
@@ -202,6 +206,11 @@ export const propertiesApi = {
     });
   },
 
-  removeImage: (imageId: string) =>
-    request<void>(`/images/${imageId}`, { method: "DELETE" }),
+  removeImage: (propertyId: string, imageId: string) =>
+    request<void>(`/properties/${propertyId}/images/${imageId}`, { method: "DELETE" }),
+
+  setCoverImage: (propertyId: string, imageId: string) =>
+    request<PropertyImage>(`/properties/${propertyId}/images/${imageId}/set-cover`, {
+      method: "PATCH",
+    }),
 };

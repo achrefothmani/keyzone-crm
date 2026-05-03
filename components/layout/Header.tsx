@@ -1,6 +1,55 @@
-import { Search, HelpCircle, Bell } from "lucide-react";
+"use client";
+
+import { Search, HelpCircle, Bell, LogOut } from "lucide-react";
+import { useAuth } from "@/lib/auth";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useEffect, useState, useCallback } from "react";
+
+const ROLE_LABEL: Record<string, string> = {
+  CHEF_AGENCE: "Chef d'agence",
+  AGENT: "Agent",
+  COORDINATEUR: "Coordinateur",
+};
+
+function initials(prenom?: string, nom?: string) {
+  const a = (prenom?.[0] ?? "").toUpperCase();
+  const b = (nom?.[0] ?? "").toUpperCase();
+  return a + b || "??";
+}
 
 export function Header() {
+  const { user, logout } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const [search, setSearch] = useState(searchParams.get("search") || "");
+
+  // Sync internal state with URL changes
+  useEffect(() => {
+    setSearch(searchParams.get("search") || "");
+  }, [searchParams]);
+
+  // Debounce URL update
+  useEffect(() => {
+    const id = setTimeout(() => {
+      const currentSearch = searchParams.get("search") || "";
+      if (search !== currentSearch) {
+        const params = new URLSearchParams(searchParams.toString());
+        if (search) {
+          params.set("search", search);
+        } else {
+          params.delete("search");
+        }
+        
+        // Redirect to /proprietes if not already there, otherwise just push params
+        const targetPath = pathname === "/proprietes" ? pathname : "/proprietes";
+        router.push(`${targetPath}?${params.toString()}`);
+      }
+    }, 400);
+    return () => clearTimeout(id);
+  }, [search, pathname, router, searchParams]);
+
   return (
     <header className="sticky top-0 z-20 bg-canvas/80 backdrop-blur-xl border-b border-line">
       <div className="flex items-center justify-between gap-6 h-[72px] px-10 max-w-[1400px] mx-auto w-full">
@@ -15,6 +64,8 @@ export function Header() {
               type="text"
               placeholder="Rechercher un bien, client ou zone…"
               className="flex-1 bg-transparent px-3.5 text-[14px] text-ink placeholder:text-ink-soft outline-none"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
             />
             <kbd className="mr-3 hidden md:flex items-center gap-1 rounded-md border border-line bg-canvas px-1.5 py-0.5 text-[10px] font-medium text-ink-soft">
               ⌘ K
@@ -40,22 +91,31 @@ export function Header() {
             <span className="absolute top-2.5 right-2.5 w-1.5 h-1.5 rounded-full bg-gold ring-2 ring-canvas" />
           </button>
 
-          {/* Avatar */}
+          {/* Avatar + logout */}
           <div className="flex items-center gap-3 ml-2 pl-4 border-l border-line">
             <div className="text-right hidden md:block">
               <div className="text-[13px] font-medium text-ink leading-tight">
-                Achref Othmani
+                {user ? `${user.prenom} ${user.nom}` : "—"}
               </div>
               <div className="text-[11px] text-ink-muted leading-tight">
-                Agent senior
+                {user ? (ROLE_LABEL[user.role] ?? user.role) : ""}
               </div>
             </div>
             <div className="relative">
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gold to-gold-deep flex items-center justify-center text-white text-[13px] font-medium ring-2 ring-canvas shadow-card">
-                AO
+                {initials(user?.prenom, user?.nom)}
               </div>
               <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-canvas" />
             </div>
+            <button
+              type="button"
+              onClick={logout}
+              aria-label="Déconnexion"
+              className="flex items-center justify-center w-10 h-10 rounded-full text-ink-muted hover:bg-surface hover:text-danger transition-colors"
+              title="Déconnexion"
+            >
+              <LogOut className="w-[18px] h-[18px]" strokeWidth={1.5} />
+            </button>
           </div>
         </div>
       </div>

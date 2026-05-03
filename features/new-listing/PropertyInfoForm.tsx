@@ -1,10 +1,65 @@
+"use client";
+
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { Field } from "@/components/ui/Field";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
-import { managers, propertyTypes } from "@/lib/data";
+import { useAuth, canValidate } from "@/lib/auth";
+import { propertyTypes } from "@/lib/data";
+import type {
+  PropertyStatus,
+  PropertyType,
+  PropertyValidation,
+  PropertyVocation,
+  User,
+} from "@/lib/types";
 
-export function PropertyInfoForm() {
+export type PropertyInfo = {
+  title: string;
+  type: PropertyType | "";
+  vocation: PropertyVocation | "";
+  status: PropertyStatus;
+  validation: PropertyValidation;
+  rooms: string;
+  bedrooms: string;
+  bathrooms: string;
+  floor: string;
+  surface: string;
+  price: string;
+  furnished: boolean;
+  description: string;
+  responsible_id: string;
+};
+
+const STATUS_OPTIONS: { value: PropertyStatus; label: string }[] = [
+  { value: "Disponible", label: "Disponible" },
+  { value: "Réservé", label: "Réservé" },
+  { value: "Vendu", label: "Vendu" },
+  { value: "Loué", label: "Loué" },
+];
+
+const VALIDATION_OPTIONS: { value: PropertyValidation; label: string }[] = [
+  { value: "En attente de validation", label: "En attente de validation" },
+  { value: "Validée", label: "Validée" },
+];
+
+const VOCATION_OPTIONS: { value: PropertyVocation; label: string }[] = [
+  { value: "Vente", label: "Vente" },
+  { value: "Location", label: "Location" },
+];
+
+export function PropertyInfoForm({
+  value,
+  onChange,
+  responsibles,
+}: {
+  value: PropertyInfo;
+  onChange: (patch: Partial<PropertyInfo>) => void;
+  responsibles: User[];
+}) {
+  const { user } = useAuth();
+  const isAuthorized = canValidate(user);
+
   return (
     <Card>
       <CardHeader
@@ -13,59 +68,157 @@ export function PropertyInfoForm() {
       />
       <CardBody className="space-y-6">
         <Field label="Titre de l’annonce" required>
-          <Input placeholder="ex. Villa S+4 avec piscine et jardin" />
+          <Input
+            placeholder="ex. Villa S+4 avec piscine et jardin"
+            value={value.title}
+            onChange={(e) => onChange({ title: e.target.value })}
+            required
+          />
         </Field>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
           <Field label="Type de bien" required>
             <Select
               placeholder="Sélectionner"
+              value={value.type}
+              onChange={(e) => onChange({ type: e.target.value as PropertyType })}
               options={propertyTypes.map((t) => ({ value: t, label: t }))}
+              required
             />
           </Field>
+          <Field label="Vocation" required>
+            <Select
+              placeholder="Sélectionner"
+              value={value.vocation}
+              onChange={(e) =>
+                onChange({ vocation: e.target.value as PropertyVocation })
+              }
+              options={VOCATION_OPTIONS}
+              required
+            />
+          </Field>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-5">
           <Field label="Statut" required>
             <Select
-              defaultValue="disponible"
-              options={[
-                { value: "disponible", label: "Disponible" },
-                { value: "reserve", label: "Réservé" },
-                { value: "vendu", label: "Vendu" },
-                { value: "loue", label: "Loué" },
-              ]}
+              value={value.status}
+              onChange={(e) =>
+                onChange({ status: e.target.value as PropertyStatus })
+              }
+              options={STATUS_OPTIONS}
+            />
+          </Field>
+          <Field label="Validation" required>
+            <Select
+              value={value.validation}
+              onChange={(e) =>
+                onChange({ validation: e.target.value as PropertyValidation })
+              }
+              options={VALIDATION_OPTIONS}
+              disabled={!isAuthorized}
+            />
+          </Field>
+          <Field
+            label={value.vocation === "Location" ? "Loyer / mois (TND)" : "Prix (TND)"}
+            required
+          >
+            <Input
+              type="number"
+              min={0}
+              step="any"
+              placeholder="0"
+              value={value.price}
+              onChange={(e) => onChange({ price: e.target.value })}
+              required
             />
           </Field>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-5">
           <Field label="Pièces">
-            <Input type="number" placeholder="5" />
+            <Input
+              type="number"
+              min={0}
+              placeholder="5"
+              value={value.rooms}
+              onChange={(e) => onChange({ rooms: e.target.value })}
+            />
           </Field>
           <Field label="Chambres">
-            <Input type="number" placeholder="3" />
+            <Input
+              type="number"
+              min={0}
+              placeholder="3"
+              value={value.bedrooms}
+              onChange={(e) => onChange({ bedrooms: e.target.value })}
+            />
           </Field>
           <Field label="Salles d’eau">
-            <Input type="number" placeholder="2" />
+            <Input
+              type="number"
+              min={0}
+              placeholder="2"
+              value={value.bathrooms}
+              onChange={(e) => onChange({ bathrooms: e.target.value })}
+            />
           </Field>
           <Field label="Étage">
-            <Input type="number" placeholder="—" />
+            <Input
+              type="number"
+              placeholder="—"
+              value={value.floor}
+              onChange={(e) => onChange({ floor: e.target.value })}
+            />
           </Field>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
           <Field label="Surface">
-            <Input type="number" placeholder="180" suffix="m²" />
+            <Input
+              type="number"
+              min={0}
+              step="any"
+              placeholder="180"
+              suffix="m²"
+              value={value.surface}
+              onChange={(e) => onChange({ surface: e.target.value })}
+            />
           </Field>
-          <Field label="Responsable" required>
+          <Field label="Responsable">
             <Select
-              placeholder="Assigner un agent"
-              options={managers.map((m) => ({ value: m, label: m }))}
+              placeholder="Aucun"
+              value={value.responsible_id}
+              onChange={(e) => onChange({ responsible_id: e.target.value })}
+              options={[
+                { value: "", label: "Aucun" },
+                ...responsibles.map((u) => ({
+                  value: u.id,
+                  label: `${u.prenom} ${u.nom}`,
+                })),
+              ]}
             />
           </Field>
         </div>
 
-        <Field label="Description" hint="Mettez en avant les atouts du bien et la qualité du voisinage.">
+        <label className="flex items-center gap-2.5 text-[13px] text-ink">
+          <input
+            type="checkbox"
+            checked={value.furnished}
+            onChange={(e) => onChange({ furnished: e.target.checked })}
+            className="w-4 h-4 rounded border-line text-gold focus:ring-gold/40"
+          />
+          <span>Meublé</span>
+        </label>
+
+        <Field
+          label="Description"
+          hint="Mettez en avant les atouts du bien et la qualité du voisinage."
+        >
           <textarea
             rows={4}
+            value={value.description}
+            onChange={(e) => onChange({ description: e.target.value })}
             placeholder="Belle villa contemporaine avec piscine privée, idéalement située à 5 minutes de la plage…"
             className="w-full rounded-[10px] border border-line bg-canvas px-3.5 py-3 text-sm text-ink placeholder:text-ink-soft outline-none transition-all duration-200 ease-smooth hover:border-ink/20 focus:border-gold focus:shadow-focus resize-none"
           />
