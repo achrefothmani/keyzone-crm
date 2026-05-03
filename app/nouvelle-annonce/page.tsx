@@ -33,6 +33,7 @@ const initialInfo: PropertyInfo = {
   type: "",
   vocation: "",
   status: "Disponible",
+  validation: "En attente de validation",
   rooms: "",
   bedrooms: "",
   bathrooms: "",
@@ -49,6 +50,8 @@ const initialLocation: LocationInfo = {
   city: "",
   postal_code: "",
   neighborhood: "",
+  latitude: null,
+  longitude: null,
 };
 
 const initialOwner: OwnerInfo = {
@@ -80,9 +83,7 @@ export default function NewListingPage() {
       .catch(() => setResponsibles([]));
   }, []);
 
-  function buildPayload(
-    validation: PropertyValidation,
-  ): PropertyCreatePayload | null {
+  function buildPayload(): PropertyCreatePayload | null {
     if (!info.type || !info.vocation || !info.title || !location.city || !info.price) {
       setError("Renseignez au minimum titre, type, vocation, ville et prix.");
       return null;
@@ -92,7 +93,7 @@ export default function NewListingPage() {
       type: info.type,
       vocation: info.vocation,
       status: info.status,
-      validation,
+      validation: info.validation,
       price: Number(info.price),
       furnished: info.furnished,
       surface: toNumber(info.surface),
@@ -105,6 +106,8 @@ export default function NewListingPage() {
       city: location.city,
       neighborhood: location.neighborhood.trim() || null,
       postal_code: location.postal_code.trim() || null,
+      latitude: location.latitude,
+      longitude: location.longitude,
       owner_name: owner.owner_name.trim() || null,
       owner_phone: owner.owner_phone.trim() || null,
       owner_email: owner.owner_email.trim() || null,
@@ -115,9 +118,9 @@ export default function NewListingPage() {
     };
   }
 
-  async function submit(validation: PropertyValidation) {
+  async function submit() {
     setError(null);
-    const payload = buildPayload(validation);
+    const payload = buildPayload();
     if (!payload) return;
     setSubmitting(true);
     try {
@@ -141,7 +144,7 @@ export default function NewListingPage() {
 
   function onFormSubmit(e: FormEvent) {
     e.preventDefault();
-    void submit("Validée");
+    void submit();
   }
 
   return (
@@ -162,7 +165,7 @@ export default function NewListingPage() {
               variant="outline"
               iconLeft={<Save />}
               disabled={submitting}
-              onClick={() => void submit("En attente de validation")}
+              onClick={() => void submit()}
             >
               Enregistrer
             </Button>
