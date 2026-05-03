@@ -37,8 +37,18 @@ function ChangeView({ center }: { center: [number, number] }) {
 }
 
 export function MapPicker({ latitude, longitude, onChange }: MapPickerProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const defaultCenter: [number, number] = [36.8065, 10.1815]; // Tunis
-  const center: [number, number] = latitude && longitude ? [latitude, longitude] : defaultCenter;
+  const center: [number, number] = latitude != null && longitude != null ? [latitude, longitude] : defaultCenter;
+
+  if (!mounted) {
+    return <div className="h-[300px] w-full rounded-[12px] bg-neutral-100 animate-pulse border border-line" />;
+  }
 
   return (
     <div className="h-[300px] w-full rounded-[12px] overflow-hidden border border-line relative z-0">
@@ -52,7 +62,7 @@ export function MapPicker({ latitude, longitude, onChange }: MapPickerProps) {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <MapEvents onChange={onChange} />
-        {latitude && longitude && (
+        {latitude != null && longitude != null && (
           <>
             <ChangeView center={[latitude, longitude]} />
             <Marker 
