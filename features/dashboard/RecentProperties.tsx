@@ -33,6 +33,7 @@ function PropertyCard({ p, index }: { p: Property; index: number }) {
           alt={p.title}
           fill
           sizes="(max-width: 768px) 100vw, 33vw"
+          unoptimized
           className="object-cover transition-transform duration-700 ease-smooth group-hover:scale-[1.04]"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
