@@ -1,5 +1,6 @@
 import type {
   AuthToken,
+  DashboardStats,
   Page,
   Property,
   PropertyCreatePayload,
@@ -213,4 +214,10 @@ export const propertiesApi = {
     request<PropertyImage>(`/properties/${propertyId}/images/${imageId}/set-cover`, {
       method: "PATCH",
     }),
+};
+
+// ---------- Stats ----------
+
+export const statsApi = {
+  getDashboardStats: () => request<DashboardStats>("/stats/dashboard"),
 };

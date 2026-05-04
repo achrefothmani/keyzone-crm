@@ -162,3 +162,14 @@ export type AuthToken = {
   token_type: string;
   expires_in: number;
 };
+
+export type DashboardKPI = {
+  value: number;
+  trend_value?: string;
+  trend_positive: boolean;
+};
+
+export type DashboardStats = {
+  total_properties: DashboardKPI;
+  pending_validation: DashboardKPI;
+};
