@@ -27,13 +27,24 @@ export type User = {
   updated_at: string;
 };
 
-export type PropertyType =
-  | "Appartement"
-  | "Villa"
+export type PropertyType = "Appartement" | "Villa" | "Terrain" | "Local";
+
+export type PropertySubType =
   | "Studio"
+  | "S+1"
+  | "S+2"
+  | "S+3"
+  | "S+4"
+  | "S+5"
+  | "Duplex"
+  | "Penthouse"
+  | "Villa jumelée"
+  | "Villa individuelle"
+  | "Terrain habitation"
+  | "Terrain agriculture"
+  | "Terrain promotion"
   | "Local commercial"
-  | "Terrain"
-  | "Bureau";
+  | "Local bureautique";
 
 export type PropertyStatus = "Disponible" | "Réservé" | "Vendu" | "Loué";
 export type PropertyVocation = "Vente" | "Location";
@@ -67,6 +78,7 @@ export type Property = {
   reference: string;
   title: string;
   type: PropertyType;
+  sub_type: PropertySubType | null;
   status: PropertyStatus;
   vocation: PropertyVocation;
   validation: PropertyValidation;
@@ -105,6 +117,7 @@ export type Page<T> = {
 export type PropertyFilters = {
   reference?: string;
   type?: PropertyType;
+  sub_type?: PropertySubType;
   vocation?: PropertyVocation;
   status?: PropertyStatus;
   city?: string;
@@ -122,6 +135,7 @@ export type PropertyFilters = {
 export type PropertyCreatePayload = {
   title: string;
   type: PropertyType;
+  sub_type?: PropertySubType | null;
   status?: PropertyStatus;
   vocation: PropertyVocation;
   validation?: PropertyValidation;

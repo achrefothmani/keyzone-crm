@@ -5,6 +5,7 @@ export type {
   Property,
   PropertyImage,
   PropertyType,
+  PropertySubType,
   PropertyStatus,
   PropertyVocation,
   PropertyValidation,
@@ -13,7 +14,7 @@ export type {
   Zone,
 } from "./types";
 
-import type { PropertyType } from "./types";
+import type { PropertyType, PropertySubType } from "./types";
 
 export const cities: string[] = [
   "Tunis",
@@ -28,14 +29,14 @@ export const cities: string[] = [
   "La Goulette",
 ];
 
-export const propertyTypes: PropertyType[] = [
-  "Villa",
-  "Appartement",
-  "Studio",
-  "Local commercial",
-  "Terrain",
-  "Bureau",
-];
+export const propertyTypes: PropertyType[] = ["Appartement", "Villa", "Terrain", "Local"];
+
+export const propertySubTypes: Record<PropertyType, PropertySubType[]> = {
+  Appartement: ["Studio", "S+1", "S+2", "S+3", "S+4", "S+5", "Duplex", "Penthouse"],
+  Villa: ["Villa jumelée", "Villa individuelle"],
+  Terrain: ["Terrain habitation", "Terrain agriculture", "Terrain promotion"],
+  Local: ["Local commercial", "Local bureautique"],
+};
 
 export type TimelineEntry = {
   date: string;
