@@ -8,6 +8,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import useSWR from "swr";
+import { statsApi } from "@/lib/api";
 
 type Kpi = {
   label: string;
@@ -18,39 +20,53 @@ type Kpi = {
   highlight?: boolean;
 };
 
-const kpis: Kpi[] = [
-  {
-    label: "Total propriétés",
-    value: "248",
-    sub: "Portefeuille global",
-    trend: { value: "+12%", positive: true },
-    icon: Building2,
-    highlight: true,
-  },
-  {
-    label: "En attente de validation",
-    value: "14",
-    sub: "À traiter cette semaine",
-    trend: { value: "-3", positive: true },
-    icon: Clock4,
-  },
-  {
-    label: "Visites planifiées",
-    value: "32",
-    sub: "Sur les 7 prochains jours",
-    trend: { value: "+8%", positive: true },
-    icon: CalendarCheck2,
-  },
-  {
-    label: "Vues annonces",
-    value: "12 489",
-    sub: "30 derniers jours",
-    trend: { value: "+24%", positive: true },
-    icon: Eye,
-  },
-];
-
 export function KpiGrid() {
+  const { data, isLoading } = useSWR("dashboard-stats", () =>
+    statsApi.getDashboardStats(),
+  );
+
+  const kpis: Kpi[] = [
+    {
+      label: "Total propriétés",
+      value: isLoading
+        ? "..."
+        : (data?.total_properties.value.toLocaleString() ?? "0"),
+      sub: "Portefeuille global",
+      trend: {
+        value: data?.total_properties.trend_value ?? "+0%",
+        positive: data?.total_properties.trend_positive ?? true,
+      },
+      icon: Building2,
+      highlight: true,
+    },
+    {
+      label: "En attente de validation",
+      value: isLoading
+        ? "..."
+        : (data?.pending_validation.value.toLocaleString() ?? "0"),
+      sub: "À traiter cette semaine",
+      trend: {
+        value: data?.pending_validation.trend_value ?? "0",
+        positive: data?.pending_validation.trend_positive ?? true,
+      },
+      icon: Clock4,
+    },
+    {
+      label: "Visites planifiées",
+      value: "32",
+      sub: "Sur les 7 prochains jours",
+      trend: { value: "+8%", positive: true },
+      icon: CalendarCheck2,
+    },
+    {
+      label: "Vues annonces",
+      value: "12 489",
+      sub: "30 derniers jours",
+      trend: { value: "+24%", positive: true },
+      icon: Eye,
+    },
+  ];
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
       {kpis.map((kpi, i) => {
