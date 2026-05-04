@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { PageHeading } from "@/features/dashboard/PageHeading";
 import { FiltersCard } from "@/features/dashboard/FiltersCard";
 import { KpiGrid } from "@/features/dashboard/KpiGrid";
@@ -12,9 +12,24 @@ import type { PropertyFilters } from "@/lib/types";
 
 export default function DashboardPage() {
   const [filters, setFilters] = useState<PropertyFilters>({});
+  const resultsRef = useRef<HTMLDivElement>(null);
+
+  const scrollToResults = () => {
+    resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const handleFilter = (f: PropertyFilters) => {
+    setFilters(f);
+    scrollToResults();
+  };
+
+  const handleReset = () => {
+    setFilters({});
+    scrollToResults();
+  };
 
   return (
-    <div className="px-10 py-10 space-y-10 max-w-[1400px]">
+    <div className="px-10 py-10 space-y-8 max-w-[1400px]">
       <PageHeading
         eyebrow="Vue d’ensemble"
         title="Tableau de bord"
@@ -33,12 +48,14 @@ export default function DashboardPage() {
         }
       />
 
-      <FiltersCard 
-        onFilter={(f) => setFilters(f)} 
-        onReset={() => setFilters({})} 
-      />
       <KpiGrid />
-      <RecentProperties filters={filters} />
+      <FiltersCard 
+        onFilter={handleFilter} 
+        onReset={handleReset} 
+      />
+      <div ref={resultsRef} className="scroll-mt-24">
+        <RecentProperties filters={filters} />
+      </div>
     </div>
   );
 }

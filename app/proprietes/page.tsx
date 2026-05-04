@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 
 import { PageHeading } from "@/features/dashboard/PageHeading";
@@ -23,6 +23,12 @@ export default function PropertiesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+
+  const resultsRef = useRef<HTMLDivElement>(null);
+
+  const scrollToResults = () => {
+    resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   // For debounced search input field
   const [search, setSearch] = useState(searchParams.get("search") || "");
@@ -74,6 +80,7 @@ export default function PropertiesPage() {
     }
 
     router.push(`${pathname}?${params.toString()}`);
+    scrollToResults();
   }, [pathname, router, searchParams]);
 
   // Debounce search update to URL to avoid excessive navigation events
@@ -150,7 +157,10 @@ export default function PropertiesPage() {
         <ActiveFilters 
           filters={filters} 
           onRemove={(key) => updateParams({ [key]: undefined })} 
-          onClearAll={() => router.push(pathname)} 
+          onClearAll={() => {
+            router.push(pathname);
+            scrollToResults();
+          }} 
         />
       </div>
 
@@ -159,7 +169,10 @@ export default function PropertiesPage() {
         onClose={() => setIsFiltersOpen(false)}
         filters={filters}
         onApply={(f) => updateParams(f)}
-        onReset={() => router.push(pathname)}
+        onReset={() => {
+          router.push(pathname);
+          scrollToResults();
+        }}
       />
 
       {error ? (
@@ -168,29 +181,31 @@ export default function PropertiesPage() {
         </div>
       ) : null}
 
-      {loading && items.length === 0 ? (
-        <div className="space-y-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div
-              key={i}
-              className="h-[180px] rounded-[14px] border border-line bg-elevated/40 animate-pulse"
-            />
-          ))}
-        </div>
-      ) : items.length === 0 ? (
-        <div className="rounded-[14px] border border-line bg-canvas px-8 py-16 text-center">
-          <p className="text-[15px] font-medium text-ink">Aucun bien à afficher</p>
-          <p className="mt-1 text-[13px] text-ink-muted">
-            Ajustez votre recherche ou créez une nouvelle annonce.
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {items.map((p, i) => (
-            <PropertyRow key={p.id} p={p} index={i} onDelete={handleDelete} />
-          ))}
-        </div>
-      )}
+      <div ref={resultsRef} className="scroll-mt-24">
+        {loading && items.length === 0 ? (
+          <div className="space-y-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div
+                key={i}
+                className="h-[180px] rounded-[14px] border border-line bg-elevated/40 animate-pulse"
+              />
+            ))}
+          </div>
+        ) : items.length === 0 ? (
+          <div className="rounded-[14px] border border-line bg-canvas px-8 py-16 text-center">
+            <p className="text-[15px] font-medium text-ink">Aucun bien à afficher</p>
+            <p className="mt-1 text-[13px] text-ink-muted">
+              Ajustez votre recherche ou créez une nouvelle annonce.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {items.map((p, i) => (
+              <PropertyRow key={p.id} p={p} index={i} onDelete={handleDelete} />
+            ))}
+          </div>
+        )}
+      </div>
 
       <div className="flex items-center justify-between pt-4 text-[13px] text-ink-muted">
         <span>Affichage {rangeLabel}</span>

@@ -15,9 +15,10 @@ interface FiltersFormProps {
   onApply: (filters: PropertyFilters) => void;
   onReset: () => void;
   showFooter?: boolean;
+  columns?: 1 | 2 | 3 | 4;
 }
 
-export function FiltersForm({ initialFilters, onApply, onReset, showFooter = true }: FiltersFormProps) {
+export function FiltersForm({ initialFilters, onApply, onReset, showFooter = true, columns = 4 }: FiltersFormProps) {
   const [filters, setFilters] = useState<PropertyFilters>(initialFilters);
   const [responsibles, setResponsibles] = useState<User[]>([]);
 
@@ -29,12 +30,19 @@ export function FiltersForm({ initialFilters, onApply, onReset, showFooter = tru
     setFilters(prev => ({ ...prev, [key]: value === "tous" || value === "" ? undefined : value }));
   };
 
+  const gridCols = {
+    1: "grid-cols-1",
+    2: "grid-cols-1 sm:grid-cols-2",
+    3: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
+    4: "grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
+  }[columns];
+
   return (
-    <div className="space-y-7">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-5">
+    <div className="space-y-4">
+      <div className={`grid ${gridCols} gap-x-5 gap-y-4`}>
         <Field label="Référence">
           <Input 
-            placeholder="KZ-…" 
+            placeholder="Pxxxx" 
             iconLeft={<Hash strokeWidth={1.75} />} 
             value={filters.reference || ""}
             onChange={(e) => handleChange("reference", e.target.value)}
@@ -122,16 +130,12 @@ export function FiltersForm({ initialFilters, onApply, onReset, showFooter = tru
       </div>
 
       {showFooter && (
-        <div className="flex items-center justify-between pt-5 border-t border-line-soft">
-          <p className="hidden sm:block text-[12px] text-ink-soft">
-            <span className="inline-block w-1 h-1 rounded-full bg-gold mr-1.5 align-middle" />
-            Conseil : combinez « Vocation » et « Zone » pour des résultats précis.
-          </p>
-          <div className="flex items-center gap-2.5 ml-auto">
-            <Button variant="ghost" iconLeft={<RotateCcw />} size="md" onClick={() => { setFilters({}); onReset(); }}>
+        <div className="flex items-center justify-end pt-4 border-t border-line-soft">
+          <div className="flex items-center gap-2 ml-auto">
+            <Button variant="ghost" iconLeft={<RotateCcw />} size="sm" onClick={() => { setFilters({}); onReset(); }}>
               Réinitialiser
             </Button>
-            <Button variant="primary" iconLeft={<Filter />} size="md" onClick={() => onApply(filters)}>
+            <Button variant="primary" iconLeft={<Filter />} size="sm" onClick={() => onApply(filters)}>
               Filtrer
             </Button>
           </div>

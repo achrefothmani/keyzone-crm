@@ -25,7 +25,7 @@ export function OwnerForm({
         description="Coordonnées du contact principal."
       />
       <CardBody className="space-y-5">
-        <Field label="Nom complet">
+        <Field label="Nom complet" required>
           <Input
             placeholder="Prénom Nom"
             iconLeft={<User strokeWidth={1.75} />}
@@ -33,7 +33,7 @@ export function OwnerForm({
             onChange={(e) => onChange({ owner_name: e.target.value })}
           />
         </Field>
-        <Field label="Téléphone">
+        <Field label="Téléphone" required>
           <Input
             placeholder="+216 22 123 456"
             iconLeft={<Phone strokeWidth={1.75} />}

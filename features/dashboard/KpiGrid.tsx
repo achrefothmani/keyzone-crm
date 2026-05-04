@@ -60,7 +60,7 @@ export function KpiGrid() {
           <div
             key={kpi.label}
             className={cn(
-              "group relative overflow-hidden rounded-[14px] border border-line bg-canvas p-6",
+              "group relative overflow-hidden rounded-[14px] border border-line bg-canvas p-5",
               "transition-all duration-300 ease-smooth",
               "hover:border-gold/40 hover:shadow-lift hover:-translate-y-0.5",
               "animate-fade-up",
@@ -77,35 +77,35 @@ export function KpiGrid() {
             <div className="relative flex items-start justify-between">
               <div
                 className={cn(
-                  "flex items-center justify-center w-10 h-10 rounded-[10px]",
+                  "flex items-center justify-center w-9 h-9 rounded-[10px]",
                   kpi.highlight
                     ? "bg-gold-tint text-gold-deep"
                     : "bg-surface text-ink-muted",
                 )}
               >
-                <Icon className="w-5 h-5" strokeWidth={1.6} />
+                <Icon className="w-4 h-4" strokeWidth={1.6} />
               </div>
               <span
                 className={cn(
-                  "inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-medium",
+                  "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium",
                   kpi.trend.positive
                     ? "bg-emerald-50 text-emerald-700"
                     : "bg-red-50 text-red-700",
                 )}
               >
-                <Trend className="w-3 h-3" strokeWidth={2.5} />
+                <Trend className="w-2.5 h-2.5" strokeWidth={2.5} />
                 {kpi.trend.value}
               </span>
             </div>
 
-            <div className="relative mt-7">
-              <div className="font-display text-[44px] font-light leading-none tracking-tight text-ink tabular-nums">
+            <div className="relative mt-5">
+              <div className="font-display text-[32px] font-light leading-none tracking-tight text-ink tabular-nums">
                 {kpi.value}
               </div>
-              <div className="mt-3.5 text-[14px] font-medium text-ink">
+              <div className="mt-2.5 text-[13px] font-medium text-ink">
                 {kpi.label}
               </div>
-              <div className="text-[12px] text-ink-muted mt-0.5">{kpi.sub}</div>
+              <div className="text-[11px] text-ink-muted mt-0.5">{kpi.sub}</div>
             </div>
           </div>
         );

@@ -37,7 +37,7 @@ export type PropertyType =
 
 export type PropertyStatus = "Disponible" | "Réservé" | "Vendu" | "Loué";
 export type PropertyVocation = "Vente" | "Location";
-export type PropertyValidation = "Validée" | "En attente de validation";
+export type PropertyValidation = "Validée" | "En attente de validation" | "Brouillon";
 
 export type PropertyImage = {
   id: string;

@@ -12,12 +12,8 @@ export function FiltersCard({
   onReset?: () => void;
 }) {
   return (
-    <Card>
-      <CardHeader
-        title="Filtres avancés"
-        description="Affinez la liste selon vos critères de recherche."
-      />
-      <CardBody>
+    <Card className="bg-canvas/50">
+      <CardBody className="p-5">
         <FiltersForm initialFilters={{}} onApply={onFilter} onReset={onReset} />
       </CardBody>
     </Card>

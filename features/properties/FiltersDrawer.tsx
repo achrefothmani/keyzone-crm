@@ -18,7 +18,7 @@ export function FiltersDrawer({ isOpen, onClose, filters, onApply, onReset }: Fi
   return (
     <>
       <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 transition-opacity" onClick={onClose} />
-      <div className="fixed inset-y-0 right-0 w-full max-w-md bg-canvas shadow-2xl z-50 flex flex-col animate-slide-in-right">
+      <div className="fixed inset-y-0 right-0 w-full max-w-xl bg-canvas shadow-2xl z-50 flex flex-col animate-slide-in-right">
         <div className="flex items-center justify-between px-6 py-4 border-b border-line">
           <h2 className="text-[18px] font-medium text-ink">Filtres</h2>
           <button onClick={onClose} className="p-2 hover:bg-surface rounded-full transition-colors">
@@ -30,6 +30,7 @@ export function FiltersDrawer({ isOpen, onClose, filters, onApply, onReset }: Fi
             initialFilters={filters} 
             onApply={(f) => { onApply(f); onClose(); }} 
             onReset={onReset} 
+            columns={2}
           />
         </div>
       </div>
