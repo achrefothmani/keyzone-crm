@@ -140,8 +140,12 @@ export default function PropertyDetailPage() {
           {/* Gallery Preview */}
           <div className="space-y-6">
             <div 
-              className="group relative aspect-video rounded-2xl overflow-hidden bg-surface border border-line cursor-pointer"
+              className={cn(
+                "group relative aspect-video rounded-2xl overflow-hidden bg-surface border border-line",
+                photos.length > 0 && "cursor-pointer"
+              )}
               onClick={() => {
+                if (photos.length === 0) return;
                 const coverIdx = photos.findIndex(ph => ph.is_cover);
                 setLightboxIndex(coverIdx !== -1 ? coverIdx : 0);
               }}

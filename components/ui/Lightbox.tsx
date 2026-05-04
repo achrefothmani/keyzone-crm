@@ -42,7 +42,7 @@ export function Lightbox({ images, initialIndex, isOpen, onClose }: LightboxProp
 
   // Keyboard navigation
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || images.length === 0) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight") handleNext();
       if (e.key === "ArrowLeft") handlePrev();
@@ -50,9 +50,9 @@ export function Lightbox({ images, initialIndex, isOpen, onClose }: LightboxProp
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, handleNext, handlePrev, onClose]);
+  }, [isOpen, images.length, handleNext, handlePrev, onClose]);
 
-  if (!isOpen) return null;
+  if (!isOpen || images.length === 0) return null;
 
   return (
     <div 
