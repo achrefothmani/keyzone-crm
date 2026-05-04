@@ -51,11 +51,6 @@ export function PropertyRow({
       )}
       style={{ animationDelay: `${index * 50}ms` }}
     >
-      <Link
-        href={`/proprietes/${p.id}`}
-        className="absolute inset-0 z-0"
-        aria-label={`Voir les détails de ${p.title}`}
-      />
       {/* Image */}
       <div className="relative w-full md:w-[260px] aspect-[16/10] md:aspect-auto md:h-auto flex-shrink-0 bg-surface overflow-hidden">
         <Image
@@ -141,7 +136,7 @@ export function PropertyRow({
           </div>
         </div>
 
-        <div className="mt-5 flex items-center justify-end gap-1 relative z-10">
+        <div className="mt-5 flex items-center justify-end gap-1 relative z-20">
           <Link href={`/proprietes/${p.id}`}>
             <button
               type="button"
@@ -170,6 +165,13 @@ export function PropertyRow({
           </button>
         </div>
       </div>
+
+      {/* Full-card clickable overlay */}
+      <Link
+        href={`/proprietes/${p.id}`}
+        className="absolute inset-0 z-10"
+        aria-label={`Voir les détails de ${p.title}`}
+      />
     </article>
   );
 }
