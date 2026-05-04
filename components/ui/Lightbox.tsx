@@ -55,15 +55,20 @@ export function Lightbox({ images, initialIndex, isOpen, onClose }: LightboxProp
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] bg-ink/98 backdrop-blur-sm flex flex-col items-center justify-center animate-in fade-in duration-200">
+    <div 
+      className="fixed inset-0 z-[100] bg-ink/98 backdrop-blur-sm flex flex-col items-center justify-center animate-in fade-in duration-200"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
       {/* Top Controls */}
       <div className="absolute top-0 left-0 right-0 p-6 flex items-center justify-between text-white/70">
-        <div className="text-[14px] font-medium tabular-nums">
+        <div className="text-[14px] font-medium tabular-nums px-3 py-1 border border-white/20 rounded-full bg-white/5">
           {currentIndex + 1} / {images.length}
         </div>
         <button
           onClick={onClose}
-          className="p-2 rounded-full hover:bg-white/10 hover:text-white transition-colors"
+          className="p-2 rounded-full border border-white/20 hover:bg-white/10 hover:text-white transition-colors"
           aria-label="Fermer"
         >
           <X className="w-6 h-6" />
