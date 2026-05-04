@@ -21,11 +21,13 @@ export function PhotosUpload({
   onChange,
   propertyId,
   readOnly = false,
+  onPhotoClick,
 }: {
   value: PhotoEntry[];
   onChange?: (next: PhotoEntry[]) => void;
   propertyId?: string;
   readOnly?: boolean;
+  onPhotoClick?: (index: number) => void;
 }) {
   const [isUploading, setIsUploading] = useState(false);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
@@ -165,7 +167,13 @@ export function PhotosUpload({
               <div
                 key={`${photo.url}-${i}`}
                 className="relative aspect-square rounded-[10px] overflow-hidden bg-surface ring-1 ring-line group cursor-pointer"
-                onClick={() => setLightboxIndex(i)}
+                onClick={() => {
+                  if (onPhotoClick) {
+                    onPhotoClick(i);
+                  } else {
+                    setLightboxIndex(i);
+                  }
+                }}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -220,12 +228,14 @@ export function PhotosUpload({
           </div>
         )}
 
-        <Lightbox
-          images={value.map(p => ({ url: p.url, is_cover: p.is_cover }))}
-          initialIndex={lightboxIndex ?? 0}
-          isOpen={lightboxIndex !== null}
-          onClose={() => setLightboxIndex(null)}
-        />
+        {!onPhotoClick && (
+          <Lightbox
+            images={value.map(p => ({ url: p.url, is_cover: p.is_cover }))}
+            initialIndex={lightboxIndex ?? 0}
+            isOpen={lightboxIndex !== null}
+            onClose={() => setLightboxIndex(null)}
+          />
+        )}
       </CardBody>
     </Card>
   );
