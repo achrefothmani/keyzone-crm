@@ -22,6 +22,7 @@ import { Badge } from "@/components/ui/Badge";
 import { formatPrice, formatDate, getMediaUrl, cn } from "@/lib/utils";
 import { PropertyHistory } from "@/features/properties/PropertyHistory";
 import { PhotosUpload, type PhotoEntry } from "@/features/new-listing/PhotosUpload";
+import { Lightbox } from "@/components/ui/Lightbox";
 import Image from "next/image";
 
 const statusTone: Record<string, any> = {
@@ -37,6 +38,7 @@ export default function PropertyDetailPage() {
   const [p, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   useEffect(() => {
     propertiesApi
@@ -137,14 +139,20 @@ export default function PropertyDetailPage() {
         <div className="lg:col-span-2 space-y-10">
           {/* Gallery Preview */}
           <div className="space-y-6">
-            <div className="relative aspect-video rounded-2xl overflow-hidden bg-surface border border-line">
+            <div 
+              className="group relative aspect-video rounded-2xl overflow-hidden bg-surface border border-line cursor-pointer"
+              onClick={() => {
+                const coverIdx = photos.findIndex(ph => ph.is_cover);
+                setLightboxIndex(coverIdx !== -1 ? coverIdx : 0);
+              }}
+            >
               {p.images && p.images.length > 0 ? (
                 <Image
                   src={getMediaUrl((p.images.find(i => i.is_cover) || p.images[0]).url)}
                   alt={p.title}
                   fill
                   unoptimized
-                  className="object-cover"
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
                 />
               ) : (
                 <div className="flex items-center justify-center h-full text-ink-soft">
@@ -157,7 +165,11 @@ export default function PropertyDetailPage() {
             </div>
 
             {photos.length > 0 && (
-              <PhotosUpload value={photos} readOnly />
+              <PhotosUpload 
+                value={photos} 
+                readOnly 
+                onPhotoClick={(index) => setLightboxIndex(index)}
+              />
             )}
           </div>
 
@@ -273,6 +285,13 @@ export default function PropertyDetailPage() {
           </div>
         </div>
       </div>
+
+      <Lightbox
+        images={photos.map(p => ({ url: p.url, is_cover: p.is_cover }))}
+        initialIndex={lightboxIndex ?? 0}
+        isOpen={lightboxIndex !== null}
+        onClose={() => setLightboxIndex(null)}
+      />
     </div>
   );
 }
