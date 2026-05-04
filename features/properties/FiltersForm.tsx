@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Field } from "@/components/ui/Field";
 import { Button } from "@/components/ui/Button";
-import { cities, propertyTypes } from "@/lib/data";
+import { cities, propertyTypes, propertySubTypes } from "@/lib/data";
 import { usersApi } from "@/lib/api";
 import type { User, PropertyFilters } from "@/lib/types";
 import { Filter, RotateCcw, Hash, Wallet } from "lucide-react";
@@ -53,10 +53,27 @@ export function FiltersForm({ initialFilters, onApply, onReset, showFooter = tru
           <Select
             placeholder="Sélectionner"
             value={filters.type || ""}
-            onChange={(e) => handleChange("type", e.target.value)}
+            onChange={(e) => {
+              handleChange("type", e.target.value);
+              handleChange("sub_type", undefined);
+            }}
             options={propertyTypes.map((t) => ({ value: t, label: t }))}
           />
         </Field>
+
+        {filters.type && (
+          <Field label="Sous-type">
+            <Select
+              placeholder="Sélectionner"
+              value={filters.sub_type || ""}
+              onChange={(e) => handleChange("sub_type", e.target.value)}
+              options={propertySubTypes[filters.type].map((t) => ({
+                value: t,
+                label: t,
+              }))}
+            />
+          </Field>
+        )}
 
         <Field label="Vocation">
           <Select

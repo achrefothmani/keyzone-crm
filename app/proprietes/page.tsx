@@ -37,7 +37,7 @@ export default function PropertiesPage() {
   const filters = useMemo((): PropertyFilters => {
     const params: PropertyFilters = {};
     const keys: (keyof PropertyFilters)[] = [
-      "reference", "type", "vocation", "status", "city", "responsible_id", "search"
+      "reference", "type", "sub_type", "vocation", "status", "city", "responsible_id", "search"
     ];
     
     keys.forEach(key => {

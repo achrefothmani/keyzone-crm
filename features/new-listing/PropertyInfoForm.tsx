@@ -5,9 +5,10 @@ import { Field } from "@/components/ui/Field";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { useAuth, canValidate } from "@/lib/auth";
-import { propertyTypes } from "@/lib/data";
+import { propertyTypes, propertySubTypes } from "@/lib/data";
 import type {
   PropertyStatus,
+  PropertySubType,
   PropertyType,
   PropertyValidation,
   PropertyVocation,
@@ -17,6 +18,7 @@ import type {
 export type PropertyInfo = {
   title: string;
   type: PropertyType | "";
+  sub_type: PropertySubType | "";
   vocation: PropertyVocation | "";
   status: PropertyStatus;
   validation: PropertyValidation;
@@ -77,16 +79,34 @@ export function PropertyInfoForm({
           />
         </Field>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-5">
           <Field label="Type de bien" required>
             <Select
               placeholder="Sélectionner"
               value={value.type}
-              onChange={(e) => onChange({ type: e.target.value as PropertyType })}
+              onChange={(e) =>
+                onChange({ type: e.target.value as PropertyType, sub_type: "" })
+              }
               options={propertyTypes.map((t) => ({ value: t, label: t }))}
               required
             />
           </Field>
+          {value.type && (
+            <Field label="Sous-type de bien" required>
+              <Select
+                placeholder="Sélectionner"
+                value={value.sub_type}
+                onChange={(e) =>
+                  onChange({ sub_type: e.target.value as PropertySubType })
+                }
+                options={propertySubTypes[value.type as PropertyType].map((t) => ({
+                  value: t,
+                  label: t,
+                }))}
+                required
+              />
+            </Field>
+          )}
           <Field label="Vocation" required>
             <Select
               placeholder="Sélectionner"

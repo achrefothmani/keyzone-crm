@@ -13,6 +13,7 @@ interface ActiveFiltersProps {
 const LABELS: Record<string, string> = {
   search: "Recherche",
   type: "Type",
+  sub_type: "Sous-type",
   vocation: "Vocation",
   status: "Statut",
   city: "Ville",

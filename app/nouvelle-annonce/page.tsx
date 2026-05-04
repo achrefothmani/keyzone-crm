@@ -30,6 +30,7 @@ import type {
 const initialInfo: PropertyInfo = {
   title: "",
   type: "",
+  sub_type: "",
   vocation: "",
   status: "Disponible",
   validation: "En attente de validation",
@@ -90,6 +91,7 @@ export default function NewListingPage() {
     return {
       title: info.title.trim(),
       type: info.type,
+      sub_type: info.sub_type || null,
       vocation: info.vocation,
       status: info.status,
       validation: info.validation,

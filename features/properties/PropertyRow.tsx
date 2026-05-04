@@ -76,7 +76,9 @@ export function PropertyRow({
               {p.status}
             </Badge>
             <Badge tone={validationTone[p.validation]}>{p.validation}</Badge>
-            <span className="text-[11px] text-ink-soft">{p.type}</span>
+            <span className="text-[11px] text-ink-soft">
+              {p.type} {p.sub_type ? `(${p.sub_type})` : ""}
+            </span>
           </div>
 
           <h3 className="text-[17px] font-medium tracking-tight text-ink leading-snug">

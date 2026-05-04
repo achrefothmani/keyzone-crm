@@ -251,7 +251,9 @@ export default function PropertyDetailPage() {
             <div className="space-y-2 text-[13px]">
               <div className="flex justify-between py-2 border-b border-line-soft">
                 <span className="text-ink-soft">Type</span>
-                <span className="font-medium text-ink">{p.type}</span>
+                <span className="font-medium text-ink">
+                  {p.type} {p.sub_type ? `(${p.sub_type})` : ""}
+                </span>
               </div>
               <div className="flex justify-between py-2 border-b border-line-soft">
                 <span className="text-ink-soft">Étages</span>

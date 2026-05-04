@@ -18,6 +18,7 @@ import type { Property, PropertyCreatePayload, PropertyValidation, User } from "
 const initialInfo: PropertyInfo = {
   title: "",
   type: "",
+  sub_type: "",
   vocation: "",
   status: "Disponible",
   validation: "En attente de validation",
@@ -81,6 +82,7 @@ export default function UpdatePropertyPage() {
         setInfo({
           title: property.title,
           type: property.type,
+          sub_type: property.sub_type ?? "",
           vocation: property.vocation,
           status: property.status,
           validation: property.validation,
@@ -134,6 +136,7 @@ export default function UpdatePropertyPage() {
     return {
       title: info.title.trim(),
       type: info.type as any,
+      sub_type: info.sub_type || null,
       vocation: info.vocation as any,
       status: info.status as any,
       validation: info.validation,
