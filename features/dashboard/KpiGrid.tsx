@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import {
   TrendingUp,
   TrendingDown,
@@ -20,52 +21,61 @@ type Kpi = {
   highlight?: boolean;
 };
 
+const ANIMATION_DELAY_BASE = 60;
+
 export function KpiGrid() {
-  const { data, isLoading } = useSWR("dashboard-stats", () =>
+  const { data, error, isLoading } = useSWR("dashboard-stats", () =>
     statsApi.getDashboardStats(),
   );
 
-  const kpis: Kpi[] = [
-    {
-      label: "Total propriétés",
-      value: isLoading
-        ? "..."
-        : (data?.total_properties.value.toLocaleString() ?? "0"),
-      sub: "Portefeuille global",
-      trend: {
-        value: data?.total_properties.trend_value ?? "+0%",
-        positive: data?.total_properties.trend_positive ?? true,
+  const kpis: Kpi[] = useMemo(
+    () => [
+      {
+        label: "Total propriétés",
+        value: isLoading
+          ? "..."
+          : error
+            ? "Error"
+            : (data?.total_properties.value.toLocaleString() ?? "0"),
+        sub: "Portefeuille global",
+        trend: {
+          value: data?.total_properties.trend_value ?? "+0%",
+          positive: data?.total_properties.trend_positive ?? true,
+        },
+        icon: Building2,
+        highlight: true,
       },
-      icon: Building2,
-      highlight: true,
-    },
-    {
-      label: "En attente de validation",
-      value: isLoading
-        ? "..."
-        : (data?.pending_validation.value.toLocaleString() ?? "0"),
-      sub: "À traiter cette semaine",
-      trend: {
-        value: data?.pending_validation.trend_value ?? "0",
-        positive: data?.pending_validation.trend_positive ?? true,
+      {
+        label: "En attente de validation",
+        value: isLoading
+          ? "..."
+          : error
+            ? "Error"
+            : (data?.pending_validation.value.toLocaleString() ?? "0"),
+        sub: "À traiter cette semaine",
+        trend: {
+          value: data?.pending_validation.trend_value ?? "0",
+          positive: data?.pending_validation.trend_positive ?? true,
+        },
+        icon: Clock4,
       },
-      icon: Clock4,
-    },
-    {
-      label: "Visites planifiées",
-      value: "32",
-      sub: "Sur les 7 prochains jours",
-      trend: { value: "+8%", positive: true },
-      icon: CalendarCheck2,
-    },
-    {
-      label: "Vues annonces",
-      value: "12 489",
-      sub: "30 derniers jours",
-      trend: { value: "+24%", positive: true },
-      icon: Eye,
-    },
-  ];
+      {
+        label: "Visites planifiées",
+        value: "32",
+        sub: "Sur les 7 prochains jours",
+        trend: { value: "+8%", positive: true },
+        icon: CalendarCheck2,
+      },
+      {
+        label: "Vues annonces",
+        value: "12 489",
+        sub: "30 derniers jours",
+        trend: { value: "+24%", positive: true },
+        icon: Eye,
+      },
+    ],
+    [data, isLoading, error],
+  );
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -81,7 +91,7 @@ export function KpiGrid() {
               "hover:border-gold/40 hover:shadow-lift hover:-translate-y-0.5",
               "animate-fade-up",
             )}
-            style={{ animationDelay: `${i * 60}ms` }}
+            style={{ animationDelay: `${i * ANIMATION_DELAY_BASE}ms` }}
           >
             {kpi.highlight ? (
               <>
