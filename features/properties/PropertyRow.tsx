@@ -18,9 +18,10 @@ const statusTone: Record<Property["status"], "success" | "info" | "warning" | "n
   Réservé: "warning",
 };
 
-const validationTone: Record<Property["validation"], "gold" | "warning"> = {
+const validationTone: Record<Property["validation"], "gold" | "warning" | "neutral"> = {
   Validée: "gold",
   "En attente de validation": "warning",
+  Brouillon: "neutral",
 };
 
 function coverImage(p: Property): string {

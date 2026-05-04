@@ -41,6 +41,7 @@ const STATUS_OPTIONS: { value: PropertyStatus; label: string }[] = [
 const VALIDATION_OPTIONS: { value: PropertyValidation; label: string }[] = [
   { value: "En attente de validation", label: "En attente de validation" },
   { value: "Validée", label: "Validée" },
+  { value: "Brouillon", label: "Brouillon" },
 ];
 
 const VOCATION_OPTIONS: { value: PropertyVocation; label: string }[] = [
