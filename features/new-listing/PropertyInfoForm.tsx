@@ -4,6 +4,7 @@ import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { Field } from "@/components/ui/Field";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
+import { RichTextEditor } from "@/components/ui/RichTextEditor";
 import { useAuth, canValidate } from "@/lib/auth";
 import { propertyTypes, propertySubTypes } from "@/lib/data";
 import type {
@@ -236,12 +237,10 @@ export function PropertyInfoForm({
           label="Description"
           hint="Mettez en avant les atouts du bien et la qualité du voisinage."
         >
-          <textarea
-            rows={4}
+          <RichTextEditor
             value={value.description}
-            onChange={(e) => onChange({ description: e.target.value })}
+            onChange={(html) => onChange({ description: html })}
             placeholder="Belle villa contemporaine avec piscine privée, idéalement située à 5 minutes de la plage…"
-            className="w-full rounded-[10px] border border-line bg-canvas px-3.5 py-3 text-sm text-ink placeholder:text-ink-soft outline-none transition-all duration-200 ease-smooth hover:border-ink/20 focus:border-gold focus:shadow-focus resize-none"
           />
         </Field>
       </CardBody>

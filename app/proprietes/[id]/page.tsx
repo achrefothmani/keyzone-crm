@@ -208,9 +208,16 @@ export default function PropertyDetailPage() {
           {/* Description */}
           <div className="space-y-4">
             <h2 className="text-[20px] font-semibold text-ink">Description</h2>
-            <div className="text-[15px] leading-relaxed text-ink-muted whitespace-pre-wrap">
-              {p.description || "Aucune description fournie."}
-            </div>
+            {p.description ? (
+              <div 
+                className="prose prose-sm max-w-none text-ink-muted"
+                dangerouslySetInnerHTML={{ __html: p.description }}
+              />
+            ) : (
+              <p className="text-[15px] leading-relaxed text-ink-muted italic">
+                Aucune description fournie.
+              </p>
+            )}
           </div>
 
           {/* History Section */}
