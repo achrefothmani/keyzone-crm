@@ -3,24 +3,23 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Bed, Bath, Square, MapPin, ArrowUpRight } from "lucide-react";
+import { Bed, Bath, Square, MapPin, ArrowUpRight, ImageOff } from "lucide-react";
 
 import { Badge } from "@/components/ui/Badge";
 import { formatPrice, getMediaUrl } from "@/lib/utils";
 import { propertiesApi } from "@/lib/api";
 import type { Property, PropertyFilters } from "@/lib/types";
 
-const FALLBACK_IMAGE =
-  "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1200&q=80&auto=format&fit=crop";
-
-function coverImage(p: Property): string {
-  if (!p.images || p.images.length === 0) return FALLBACK_IMAGE;
+function coverImage(p: Property): string | null {
+  if (!p.images || p.images.length === 0) return null;
   const url = (p.images.find((i) => i.is_cover) ?? p.images[0]).url;
   return getMediaUrl(url);
 }
 
 function PropertyCard({ p, index }: { p: Property; index: number }) {
   const isVente = p.vocation === "Vente";
+  const imageSrc = coverImage(p);
+
   return (
     <Link
       href={`/proprietes/${p.id}`}
@@ -28,14 +27,23 @@ function PropertyCard({ p, index }: { p: Property; index: number }) {
       style={{ animationDelay: `${index * 80}ms` }}
     >
       <div className="relative aspect-[16/10] overflow-hidden bg-surface">
-        <Image
-          src={coverImage(p)}
-          alt={p.title}
-          fill
-          sizes="(max-width: 768px) 100vw, 33vw"
-          unoptimized
-          className="object-cover transition-transform duration-700 ease-smooth group-hover:scale-[1.04]"
-        />
+        {imageSrc ? (
+          <Image
+            src={imageSrc}
+            alt={p.title}
+            fill
+            sizes="(max-width: 768px) 100vw, 33vw"
+            unoptimized
+            className="object-cover transition-transform duration-700 ease-smooth group-hover:scale-[1.04]"
+          />
+        ) : (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-line/20 text-ink-soft">
+            <ImageOff className="w-10 h-10 mb-2 opacity-20" />
+            <span className="text-[11px] font-medium opacity-40 uppercase tracking-widest">
+              Aucune photo
+            </span>
+          </div>
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         <div className="absolute top-4 left-4 flex items-center gap-2">
           <Badge tone={isVente ? "gold" : "info"}>

@@ -32,10 +32,30 @@ export function formatRelative(value: string) {
 
 export function getMediaUrl(url: string | null | undefined): string {
   if (!url) return "";
-  if (url.startsWith("http") || url.startsWith("blob:") || url.startsWith("data:")) {
-    return url;
+  
+  let finalUrl = url;
+  if (!url.startsWith("http") && !url.startsWith("blob:") && !url.startsWith("data:")) {
+    // Base URL for uploads - preferring production HTTPS
+    const base = process.env.NEXT_PUBLIC_MEDIA_URL || "https://api.keyzonestates.com";
+    finalUrl = `${base}${url.startsWith("/") ? "" : "/"}${url}`;
   }
-  // Base URL for uploads - adjusting to the user's example port 8009
-  const base = process.env.NEXT_PUBLIC_MEDIA_URL || "http://localhost:8009";
-  return `${base}${url.startsWith("/") ? "" : "/"}${url}`;
+  
+  // Upgrade http to https for our domains and IP to avoid mixed content in production
+  if (
+    finalUrl.startsWith("http://api.keyzonestates.com") || 
+    finalUrl.startsWith("http://keyzonestates.com") ||
+    finalUrl.startsWith("http://www.keyzonestates.com") ||
+    finalUrl.startsWith("http://crm.keyzonestates.com") ||
+    finalUrl.startsWith("http://162.19.228.222")
+  ) {
+    // Replace the entire origin with the secure API domain
+    try {
+      const parsed = new URL(finalUrl);
+      return `https://api.keyzonestates.com${parsed.pathname}${parsed.search}`;
+    } catch {
+      return finalUrl.replace("http://", "https://");
+    }
+  }
+  
+  return finalUrl;
 }

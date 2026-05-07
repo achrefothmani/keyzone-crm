@@ -13,7 +13,8 @@ import {
   User, 
   Phone, 
   Mail,
-  Calendar
+  Calendar,
+  ImageOff
 } from "lucide-react";
 
 import { propertiesApi } from "@/lib/api";
@@ -159,8 +160,11 @@ export default function PropertyDetailPage() {
                   className="object-cover transition-transform duration-500 group-hover:scale-105"
                 />
               ) : (
-                <div className="flex items-center justify-center h-full text-ink-soft">
-                  Aucune image disponible
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-line/20 text-ink-soft">
+                  <ImageOff className="w-12 h-12 mb-3 opacity-20" />
+                  <span className="text-[13px] font-medium opacity-40 uppercase tracking-[0.2em]">
+                    Aucune photo disponible
+                  </span>
                 </div>
               )}
               <div className="absolute bottom-4 right-4 bg-ink/80 backdrop-blur-sm text-white px-3 py-1.5 rounded-lg text-[12px]">

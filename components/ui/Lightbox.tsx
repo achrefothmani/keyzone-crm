@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import { getMediaUrl } from "@/lib/utils";
@@ -16,6 +16,8 @@ interface LightboxProps {
 export function Lightbox({ images, initialIndex, isOpen, onClose }: LightboxProps) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [mounted, setMounted] = useState(false);
+  const touchStartX = useRef<number | null>(null);
+  const touchEndX = useRef<number | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -46,6 +48,32 @@ export function Lightbox({ images, initialIndex, isOpen, onClose }: LightboxProp
     setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
   }, [images.length]);
 
+  // Swipe detection logic
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e: React.TouchEvent | React.MouseEvent) => {
+    touchEndX.current = null;
+    touchStartX.current = "touches" in e ? e.touches[0].clientX : e.clientX;
+  };
+
+  const onTouchMove = (e: React.TouchEvent | React.MouseEvent) => {
+    touchEndX.current = "touches" in e ? e.touches[0].clientX : e.clientX;
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStartX.current || !touchEndX.current) return;
+    
+    const distance = touchStartX.current - touchEndX.current;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe) {
+      handleNext();
+    } else if (isRightSwipe) {
+      handlePrev();
+    }
+  };
+
   // Keyboard navigation
   useEffect(() => {
     if (!isOpen || images.length === 0) return;
@@ -66,15 +94,22 @@ export function Lightbox({ images, initialIndex, isOpen, onClose }: LightboxProp
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+      onMouseDown={onTouchStart}
+      onMouseMove={onTouchMove}
+      onMouseUp={onTouchEnd}
+      onMouseLeave={onTouchEnd}
     >
       {/* Top Controls */}
-      <div className="absolute top-0 left-0 right-0 p-6 flex items-center justify-between text-white z-20">
+      <div className="absolute top-0 left-0 right-0 p-6 flex items-center justify-between text-white z-20 pointer-events-none">
         <div className="text-[14px] font-medium tabular-nums px-4 py-1.5 border border-white/40 rounded-full bg-white/10 backdrop-blur-sm shadow-sm">
           {currentIndex + 1} / {images.length}
         </div>
         <button
           onClick={onClose}
-          className="p-2 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm hover:bg-white/20 hover:text-white transition-all shadow-sm"
+          className="p-2 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm hover:bg-white/20 hover:text-white transition-all shadow-sm pointer-events-auto"
           aria-label="Fermer"
         >
           <X className="w-6 h-6" />
@@ -83,7 +118,7 @@ export function Lightbox({ images, initialIndex, isOpen, onClose }: LightboxProp
 
       {/* Main Content */}
       <div 
-        className="relative w-full h-full flex items-center justify-center p-4 md:p-24 z-10"
+        className="relative w-full h-full flex items-center justify-center p-4 md:p-24 z-10 cursor-grab active:cursor-grabbing"
         onClick={(e) => {
           if (e.target === e.currentTarget) onClose();
         }}
@@ -102,8 +137,9 @@ export function Lightbox({ images, initialIndex, isOpen, onClose }: LightboxProp
         <img
           src={getMediaUrl(images[currentIndex].url)}
           alt=""
-          className="max-w-full max-h-full object-contain select-none animate-in zoom-in-95 duration-300"
+          className="max-w-full max-h-full object-contain select-none pointer-events-none animate-in zoom-in-95 duration-300"
           onClick={(e) => e.stopPropagation()}
+          draggable={false}
         />
 
         <button
@@ -119,8 +155,8 @@ export function Lightbox({ images, initialIndex, isOpen, onClose }: LightboxProp
       </div>
 
       {/* Thumbnail Strip */}
-      <div className="absolute bottom-8 left-0 right-0 flex justify-center px-6 z-20">
-        <div className="flex gap-2 p-2 rounded-[16px] bg-white/10 border border-white/20 backdrop-blur-md max-w-full overflow-x-auto no-scrollbar">
+      <div className="absolute bottom-8 left-0 right-0 flex justify-center px-6 z-20 pointer-events-none">
+        <div className="flex gap-2 p-2 rounded-[16px] bg-white/10 border border-white/20 backdrop-blur-md max-w-full overflow-x-auto no-scrollbar pointer-events-auto">
           {images.map((img, i) => (
             <button
               key={i}
@@ -136,6 +172,7 @@ export function Lightbox({ images, initialIndex, isOpen, onClose }: LightboxProp
                 src={getMediaUrl(img.url)}
                 alt=""
                 className="w-full h-full object-cover"
+                draggable={false}
               />
             </button>
           ))}

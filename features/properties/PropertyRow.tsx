@@ -2,33 +2,30 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Bed, Bath, Square, MapPin, Eye, Pencil, Trash2 } from "lucide-react";
+import { Bed, Bath, Square, MapPin, Eye, Pencil, Trash2, ImageOff } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { formatPrice, formatRelative, getMediaUrl } from "@/lib/utils";
 import type { Property } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-const FALLBACK_IMAGE =
-  "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1200&q=80&auto=format&fit=crop";
+function coverImage(p: Property): string | null {
+  if (!p.images || p.images.length === 0) return null;
+  const url = (p.images.find((i) => i.is_cover) ?? p.images[0]).url;
+  return getMediaUrl(url);
+}
 
-const statusTone: Record<Property["status"], "success" | "info" | "warning" | "neutral"> = {
+const statusTone: Record<string, any> = {
   Disponible: "success",
   Loué: "info",
   Vendu: "neutral",
   Réservé: "warning",
 };
 
-const validationTone: Record<Property["validation"], "gold" | "warning" | "neutral"> = {
+const validationTone: Record<string, any> = {
   Validée: "gold",
   "En attente de validation": "warning",
   Brouillon: "neutral",
 };
-
-function coverImage(p: Property): string {
-  if (!p.images || p.images.length === 0) return FALLBACK_IMAGE;
-  const url = (p.images.find((i) => i.is_cover) ?? p.images[0]).url;
-  return getMediaUrl(url);
-}
 
 export function PropertyRow({
   p,
@@ -40,6 +37,7 @@ export function PropertyRow({
   onDelete?: (id: string) => void;
 }) {
   const isVente = p.vocation === "Vente";
+  const imageSrc = coverImage(p);
 
   return (
     <article
@@ -53,14 +51,23 @@ export function PropertyRow({
     >
       {/* Image */}
       <div className="relative w-full md:w-[260px] aspect-[16/10] md:aspect-auto md:h-auto flex-shrink-0 bg-surface overflow-hidden">
-        <Image
-          src={coverImage(p)}
-          alt={p.title}
-          fill
-          unoptimized
-          sizes="260px"
-          className="object-cover transition-transform duration-700 ease-smooth group-hover:scale-105"
-        />
+        {imageSrc ? (
+          <Image
+            src={imageSrc}
+            alt={p.title}
+            fill
+            unoptimized
+            sizes="260px"
+            className="object-cover transition-transform duration-700 ease-smooth group-hover:scale-105"
+          />
+        ) : (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-line/20 text-ink-soft">
+            <ImageOff className="w-8 h-8 mb-2 opacity-20" />
+            <span className="text-[10px] font-medium opacity-40 uppercase tracking-widest">
+              Aucune photo
+            </span>
+          </div>
+        )}
         <div className="absolute top-3.5 left-3.5">
           <Badge tone={isVente ? "gold" : "info"}>
             {isVente ? "À vendre" : "À louer"}
