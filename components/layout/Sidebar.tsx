@@ -10,10 +10,12 @@ import {
   Settings,
   Plus,
   ChevronRight,
+  BarChart3,
 } from "lucide-react";
 
 const navigation = [
   { label: "Tableau de bord", href: "/", icon: LayoutGrid },
+  { label: "Analyses", href: "/analyses", icon: BarChart3 },
   { label: "Propriétés", href: "/proprietes", icon: Building2 },
   { label: "Utilisateurs", href: "/utilisateurs", icon: Users },
   { label: "Paramètres", href: "/parametres", icon: Settings },
