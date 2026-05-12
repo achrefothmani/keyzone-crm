@@ -46,6 +46,7 @@ export function getMediaUrl(url: string | null | undefined): string {
     finalUrl.startsWith("http://keyzonestates.com") ||
     finalUrl.startsWith("http://www.keyzonestates.com") ||
     finalUrl.startsWith("http://crm.keyzonestates.com") ||
+    finalUrl.startsWith("http://umami.keyzonestates.com") ||
     finalUrl.startsWith("http://162.19.228.222")
   ) {
     // Replace the entire origin with the secure API domain

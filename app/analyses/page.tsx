@@ -3,7 +3,7 @@
 import { PageHeading } from "@/features/dashboard/PageHeading";
 
 export default function AnalyticsPage() {
-  const umamiUrl = process.env.NEXT_PUBLIC_UMAMI_SHARE_URL || "http://localhost:3004";
+  const umamiUrl = process.env.NEXT_PUBLIC_UMAMI_SHARE_URL || "https://umami.keyzonestates.com";
 
   return (
     <div className="px-10 py-10 space-y-8 max-w-[1400px] h-screen flex flex-col">

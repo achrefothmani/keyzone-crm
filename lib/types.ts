@@ -199,6 +199,7 @@ export type VisitRequest = {
   email?: string | null;
   property_reference: string;
   assigned_user_id?: string | null;
+  assigned_user?: PropertyResponsible | null;
   visit_date?: string | null;
   status: VisitRequestStatus;
   source: "website" | "crm";
