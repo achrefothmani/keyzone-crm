@@ -10,6 +10,8 @@ import type {
   User,
   UserCreatePayload,
   UserRole,
+  VisitRequest,
+  VisitRequestUpdate,
   Zone,
 } from "./types";
 
@@ -213,6 +215,19 @@ export const propertiesApi = {
   setCoverImage: (propertyId: string, imageId: string) =>
     request<PropertyImage>(`/properties/${propertyId}/images/${imageId}/set-cover`, {
       method: "PATCH",
+    }),
+};
+
+// ---------- Visit Requests ----------
+
+export const visitRequestsApi = {
+  list: (params?: { limit?: number; offset?: number }) =>
+    request<Page<VisitRequest>>("/visit-requests", { query: params }),
+
+  update: (id: string, payload: VisitRequestUpdate) =>
+    request<VisitRequest>(`/visit-requests/${id}`, {
+      method: "PATCH",
+      body: payload,
     }),
 };
 

@@ -187,3 +187,27 @@ export type DashboardStats = {
   total_properties: DashboardKPI;
   pending_validation: DashboardKPI;
 };
+
+export type VisitRequestStatus = "pending" | "confirmed" | "completed" | "cancelled";
+
+export type VisitRequest = {
+  id: string;
+  created_at: string;
+  updated_at?: string;
+  full_name: string;
+  phone: string;
+  email?: string | null;
+  property_reference: string;
+  assigned_user_id?: string | null;
+  visit_date?: string | null;
+  status: VisitRequestStatus;
+  source: "website" | "crm";
+  notes?: string | null;
+};
+
+export type VisitRequestUpdate = {
+  assigned_user_id?: string | null;
+  visit_date?: string | null;
+  status?: VisitRequestStatus;
+  notes?: string | null;
+};
