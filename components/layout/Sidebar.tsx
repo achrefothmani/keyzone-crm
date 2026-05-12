@@ -11,12 +11,14 @@ import {
   Plus,
   ChevronRight,
   BarChart3,
+  Clock,
 } from "lucide-react";
 
 const navigation = [
   { label: "Tableau de bord", href: "/", icon: LayoutGrid },
   { label: "Analyses", href: "/analyses", icon: BarChart3 },
   { label: "Propriétés", href: "/proprietes", icon: Building2 },
+  { label: "Visites", href: "/visites", icon: Clock },
   { label: "Utilisateurs", href: "/utilisateurs", icon: Users },
   { label: "Paramètres", href: "/parametres", icon: Settings },
 ];
