@@ -3,6 +3,7 @@ import { Inter, Fraunces } from "next/font/google";
 import "./globals.css";
 import { AppShell } from "@/components/layout/AppShell";
 import { AuthProvider } from "@/lib/auth";
+import { NotificationProvider } from "@/lib/notifications";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 
 const inter = Inter({
@@ -33,9 +34,11 @@ export default function RootLayout({
     <html lang="fr" className={`${inter.variable} ${fraunces.variable}`} suppressHydrationWarning>
       <body className="font-sans bg-canvas text-ink antialiased" suppressHydrationWarning>
         <AuthProvider>
-          <AuthGuard>
-            <AppShell>{children}</AppShell>
-          </AuthGuard>
+          <NotificationProvider>
+            <AuthGuard>
+              <AppShell>{children}</AppShell>
+            </AuthGuard>
+          </NotificationProvider>
         </AuthProvider>
       </body>
     </html>
