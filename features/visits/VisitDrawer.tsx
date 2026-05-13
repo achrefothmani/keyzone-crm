@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Loader2 } from "lucide-react";
+import { X, Loader2, Trash2, Calendar, Clock } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 import { Select } from "@/components/ui/Select";
@@ -27,6 +27,7 @@ const STATUS_OPTIONS: { value: VisitRequestStatus; label: string }[] = [
 export function VisitDrawer({ isOpen, onClose, visit, onSuccess }: VisitDrawerProps) {
   const [users, setUsers] = useState<User[]>([]);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   
   const [status, setStatus] = useState<VisitRequestStatus>("pending");
   const [assignedUserId, setAssignedUserId] = useState<string>("");
@@ -76,6 +77,31 @@ export function VisitDrawer({ isOpen, onClose, visit, onSuccess }: VisitDrawerPr
     }
   };
 
+  const handleDelete = async () => {
+    if (!visit || !window.confirm("Êtes-vous sûr de vouloir supprimer cette demande de visite ?")) return;
+    
+    setDeleting(true);
+    try {
+      await visitRequestsApi.remove(visit.id);
+      onSuccess();
+      onClose();
+    } catch (error) {
+      console.error("Failed to delete visit request", error);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const formatDate = (dateStr: string) => {
+    return new Intl.DateTimeFormat("fr-FR", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(new Date(dateStr));
+  };
+
   if (!isOpen || !visit) return null;
 
   return (
@@ -98,6 +124,22 @@ export function VisitDrawer({ isOpen, onClose, visit, onSuccess }: VisitDrawerPr
         </div>
 
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          {/* Info section */}
+          <div className="p-4 rounded-[12px] bg-surface border border-line-soft space-y-3">
+            <div className="flex items-center gap-3 text-[13px] text-ink">
+              <Calendar className="w-4 h-4 text-ink-muted" strokeWidth={1.6} />
+              <span className="font-medium">Demandée le:</span>
+              <span className="text-ink-muted">{formatDate(visit.created_at)}</span>
+            </div>
+            {visit.visit_date && (
+              <div className="flex items-center gap-3 text-[13px] text-ink">
+                <Clock className="w-4 h-4 text-gold-deep" strokeWidth={1.6} />
+                <span className="font-medium">RDV prévu:</span>
+                <span className="text-ink-muted">{formatDate(visit.visit_date)}</span>
+              </div>
+            )}
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <Field label="Statut">
               <Select
@@ -120,7 +162,7 @@ export function VisitDrawer({ isOpen, onClose, visit, onSuccess }: VisitDrawerPr
             </Field>
           </div>
 
-          <Field label="Date & Heure">
+          <Field label="Date & Heure du RDV">
             <Input
               type="datetime-local"
               value={visitDate}
@@ -137,14 +179,30 @@ export function VisitDrawer({ isOpen, onClose, visit, onSuccess }: VisitDrawerPr
           </Field>
         </div>
 
-        <div className="px-6 py-4 border-t border-line bg-bone/50 flex items-center justify-end gap-3">
-          <Button variant="ghost" onClick={onClose} disabled={saving}>
-            Annuler
+        <div className="px-6 py-4 border-t border-line bg-bone/50 flex items-center justify-between">
+          <Button 
+            variant="ghost" 
+            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+            onClick={handleDelete}
+            disabled={saving || deleting}
+          >
+            {deleting ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <Trash2 className="w-4 h-4 mr-2" />
+            )}
+            Supprimer
           </Button>
-          <Button onClick={handleSave} disabled={saving}>
-            {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-            Enregistrer
-          </Button>
+          
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" onClick={onClose} disabled={saving || deleting}>
+              Annuler
+            </Button>
+            <Button onClick={handleSave} disabled={saving || deleting}>
+              {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Enregistrer
+            </Button>
+          </div>
         </div>
       </div>
     </>

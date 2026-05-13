@@ -61,16 +61,30 @@ export function KpiGrid() {
       },
       {
         label: "Visites planifiées",
-        value: "32",
-        sub: "Sur les 7 prochains jours",
-        trend: { value: "+8%", positive: true },
+        value: isLoading
+          ? "..."
+          : error
+            ? "Error"
+            : (data?.scheduled_visits.value.toLocaleString() ?? "0"),
+        sub: "En attente",
+        trend: {
+          value: data?.scheduled_visits.trend_value ?? "+0%",
+          positive: data?.scheduled_visits.trend_positive ?? true,
+        },
         icon: CalendarCheck2,
       },
       {
         label: "Vues annonces",
-        value: "12 489",
+        value: isLoading
+          ? "..."
+          : error
+            ? "Error"
+            : (data?.property_views.value.toLocaleString() ?? "0"),
         sub: "30 derniers jours",
-        trend: { value: "+24%", positive: true },
+        trend: {
+          value: data?.property_views.trend_value ?? "+0%",
+          positive: data?.property_views.trend_positive ?? true,
+        },
         icon: Eye,
       },
     ],

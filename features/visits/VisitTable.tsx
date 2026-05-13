@@ -5,9 +5,10 @@ import { VisitRow } from "./VisitRow";
 interface VisitTableProps {
   visits: VisitRequest[];
   onRowClick: (visit: VisitRequest) => void;
+  onReferenceClick: (reference: string) => void;
 }
 
-export function VisitTable({ visits, onRowClick }: VisitTableProps) {
+export function VisitTable({ visits, onRowClick, onReferenceClick }: VisitTableProps) {
   if (visits.length === 0) {
     return (
       <Card>
@@ -27,7 +28,7 @@ export function VisitTable({ visits, onRowClick }: VisitTableProps) {
         {/* Header Row */}
         <div className="grid grid-cols-12 gap-4 px-7 py-3.5 border-b border-line-soft bg-surface/50">
           <div className="col-span-1 text-[11px] font-bold uppercase tracking-wider text-ink-muted">
-            Date
+            Demande
           </div>
           <div className="col-span-2 text-[11px] font-bold uppercase tracking-wider text-ink-muted">
             Référence
@@ -56,6 +57,7 @@ export function VisitTable({ visits, onRowClick }: VisitTableProps) {
               key={visit.id} 
               visit={visit} 
               onClick={onRowClick} 
+              onReferenceClick={onReferenceClick}
             />
           ))}
         </div>

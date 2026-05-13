@@ -186,6 +186,8 @@ export type DashboardKPI = {
 export type DashboardStats = {
   total_properties: DashboardKPI;
   pending_validation: DashboardKPI;
+  scheduled_visits: DashboardKPI;
+  property_views: DashboardKPI;
 };
 
 export type VisitRequestStatus = "pending" | "confirmed" | "completed" | "cancelled";

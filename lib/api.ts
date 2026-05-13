@@ -225,12 +225,14 @@ export const visitRequestsApi = {
     request<Page<VisitRequest>>("/visit-requests", { query: params }),
 
   update: (id: string, payload: VisitRequestUpdate) =>
-    request<VisitRequest>(`/visit-requests/${id}`, {
-      method: "PATCH",
-      body: payload,
-    }),
-};
+  request<VisitRequest>(`/visit-requests/${id}`, {
+    method: "PATCH",
+    body: payload,
+  }),
 
+  remove: (id: string) =>
+  request<void>(`/visit-requests/${id}`, { method: "DELETE" }),
+  };
 // ---------- Stats ----------
 
 export const statsApi = {

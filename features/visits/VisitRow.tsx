@@ -5,9 +5,10 @@ import { StatusBadge } from "./StatusBadge";
 interface VisitRowProps {
   visit: VisitRequest;
   onClick: (visit: VisitRequest) => void;
+  onReferenceClick: (reference: string) => void;
 }
 
-export function VisitRow({ visit, onClick }: VisitRowProps) {
+export function VisitRow({ visit, onClick, onReferenceClick }: VisitRowProps) {
   const formatDateShort = (dateStr: string) => {
     return new Intl.DateTimeFormat("fr-FR", {
       day: "2-digit",
@@ -37,8 +38,16 @@ export function VisitRow({ visit, onClick }: VisitRowProps) {
       </div>
 
       {/* Référence (2 cols) */}
-      <div className="col-span-2 text-[14px] font-medium text-ink truncate">
-        {visit.property_reference}
+      <div className="col-span-2 min-w-0">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onReferenceClick(visit.property_reference);
+          }}
+          className="text-[14px] font-medium text-gold hover:text-gold-deep hover:underline transition-all truncate"
+        >
+          {visit.property_reference}
+        </button>
       </div>
 
       {/* Client (3 cols) */}

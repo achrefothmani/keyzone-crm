@@ -6,6 +6,7 @@ import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { PageHeading } from "@/features/dashboard/PageHeading";
 import { VisitTable } from "@/features/visits/VisitTable";
 import { VisitDrawer } from "@/features/visits/VisitDrawer";
+import { PropertySummaryDialog } from "@/features/properties/PropertySummaryDialog";
 import { visitRequestsApi } from "@/lib/api";
 import type { VisitRequest } from "@/lib/types";
 
@@ -22,6 +23,8 @@ export default function VisitesPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedVisit, setSelectedVisit] = useState<VisitRequest | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [selectedReference, setSelectedReference] = useState<string | null>(null);
+  const [isPropertyDialogOpen, setIsPropertyDialogOpen] = useState(false);
 
   const resultsRef = useRef<HTMLDivElement>(null);
 
@@ -79,6 +82,11 @@ export default function VisitesPage() {
     setIsDrawerOpen(true);
   };
 
+  const handleReferenceClick = (reference: string) => {
+    setSelectedReference(reference);
+    setIsPropertyDialogOpen(true);
+  };
+
   return (
     <div className="px-10 py-10 space-y-10 max-w-[1400px]">
       <PageHeading
@@ -104,7 +112,11 @@ export default function VisitesPage() {
             ))}
           </div>
         ) : (
-          <VisitTable visits={items} onRowClick={handleRowClick} />
+          <VisitTable 
+            visits={items} 
+            onRowClick={handleRowClick} 
+            onReferenceClick={handleReferenceClick}
+          />
         )}
       </div>
 
@@ -142,6 +154,15 @@ export default function VisitesPage() {
         }}
         visit={selectedVisit}
         onSuccess={fetchVisits}
+      />
+
+      <PropertySummaryDialog
+        isOpen={isPropertyDialogOpen}
+        onClose={() => {
+          setIsPropertyDialogOpen(false);
+          setSelectedReference(null);
+        }}
+        reference={selectedReference}
       />
     </div>
   );

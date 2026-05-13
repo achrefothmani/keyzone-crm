@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import useSWR from "swr";
+import { statsApi } from "@/lib/api";
 import {
   LayoutGrid,
   Building2,
@@ -25,6 +27,8 @@ const navigation = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { data } = useSWR("dashboard-stats", () => statsApi.getDashboardStats());
+  const pendingVisitsCount = data?.scheduled_visits.value ?? 0;
 
   return (
     <aside className="hidden lg:flex fixed inset-y-0 left-0 w-[250px] z-30 flex-col bg-elevated border-r border-line">
@@ -52,6 +56,8 @@ export function Sidebar() {
               ? pathname === "/"
               : pathname.startsWith(item.href);
           const Icon = item.icon;
+          const showDot = item.href === "/visites" && pendingVisitsCount > 0;
+
           return (
             <Link
               key={item.href}
@@ -67,6 +73,7 @@ export function Sidebar() {
               {active ? (
                 <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-gold" />
               ) : null}
+
               <Icon
                 className={cn(
                   "w-[18px] h-[18px] transition-colors",
@@ -75,6 +82,12 @@ export function Sidebar() {
                 strokeWidth={1.6}
               />
               <span className="flex-1">{item.label}</span>
+              {showDot ? (
+                <span className="relative flex h-2 w-2 mr-1">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gold opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-gold"></span>
+                </span>
+              ) : null}
               {active ? (
                 <ChevronRight
                   className="w-3.5 h-3.5 text-gold opacity-70"
