@@ -1,6 +1,8 @@
 import type {
   AuthToken,
   DashboardStats,
+  Notification,
+  NotificationType,
   Page,
   Property,
   PropertyCreatePayload,
@@ -237,4 +239,11 @@ export const visitRequestsApi = {
 
 export const statsApi = {
   getDashboardStats: () => request<DashboardStats>("/stats/dashboard"),
+};
+
+// ---------- Notifications ----------
+
+export const notificationsApi = {
+  list: () => request<Notification[]>("/notifications"),
+  markAllAsRead: () => request<void>("/notifications/read-all", { method: "POST" }),
 };

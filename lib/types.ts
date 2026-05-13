@@ -214,3 +214,19 @@ export type VisitRequestUpdate = {
   status?: VisitRequestStatus;
   notes?: string | null;
 };
+
+export enum NotificationType {
+  PROPERTY_CREATED = "PROPERTY_CREATED",
+  VISIT_ASSIGNED = "VISIT_ASSIGNED",
+}
+
+export interface Notification {
+  id: string;
+  user_id: string;
+  title: string;
+  message: string;
+  type: NotificationType;
+  link?: string;
+  is_read: boolean;
+  created_at: string;
+}
