@@ -5,6 +5,7 @@ import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
 import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
+import { useEffect } from "react";
 import { 
   Bold, 
   Italic, 
@@ -41,6 +42,13 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
       onChange(editor.getHTML());
     },
   });
+
+  // Sync editor content with value prop
+  useEffect(() => {
+    if (editor && value !== editor.getHTML()) {
+      editor.commands.setContent(value);
+    }
+  }, [value, editor]);
 
   if (!editor) {
     return null;
