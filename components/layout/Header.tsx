@@ -2,8 +2,11 @@
 
 import { Search, HelpCircle, Bell, LogOut } from "lucide-react";
 import { useAuth } from "@/lib/auth";
+import { useNotifications } from "@/lib/notifications";
+import { NotificationList } from "./NotificationList";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
+import { cn } from "@/lib/utils";
 
 const ROLE_LABEL: Record<string, string> = {
   CHEF_AGENCE: "Chef d'agence",
@@ -19,11 +22,14 @@ function initials(prenom?: string, nom?: string) {
 
 export function Header() {
   const { user, logout } = useAuth();
+  const { notifications, unreadCount, markAllAsRead } = useNotifications();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
   const [search, setSearch] = useState(searchParams.get("search") || "");
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Sync internal state with URL changes
   useEffect(() => {
@@ -49,6 +55,28 @@ export function Header() {
     }, 400);
     return () => clearTimeout(id);
   }, [search, pathname, router, searchParams]);
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsNotificationsOpen(false);
+      }
+    }
+    if (isNotificationsOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isNotificationsOpen]);
+
+  const toggleNotifications = useCallback(() => {
+    if (!isNotificationsOpen) {
+      void markAllAsRead();
+    }
+    setIsNotificationsOpen((prev) => !prev);
+  }, [isNotificationsOpen, markAllAsRead]);
 
   return (
     <header className="sticky top-0 z-20 bg-canvas/80 backdrop-blur-xl border-b border-line">
@@ -82,14 +110,48 @@ export function Header() {
           >
             <HelpCircle className="w-[18px] h-[18px]" strokeWidth={1.5} />
           </button>
-          <button
-            type="button"
-            aria-label="Notifications"
-            className="relative flex items-center justify-center w-10 h-10 rounded-full text-ink-muted hover:bg-surface hover:text-ink transition-colors"
-          >
-            <Bell className="w-[18px] h-[18px]" strokeWidth={1.5} />
-            <span className="absolute top-2.5 right-2.5 w-1.5 h-1.5 rounded-full bg-gold ring-2 ring-canvas" />
-          </button>
+          
+          <div className="relative" ref={dropdownRef}>
+            <button
+              type="button"
+              onClick={toggleNotifications}
+              aria-label="Notifications"
+              className={cn(
+                "relative flex items-center justify-center w-10 h-10 rounded-full transition-colors",
+                isNotificationsOpen ? "bg-surface text-gold" : "text-ink-muted hover:bg-surface hover:text-ink"
+              )}
+            >
+              <Bell className="w-[18px] h-[18px]" strokeWidth={1.5} />
+              {unreadCount > 0 && (
+                <span className="absolute top-2.5 right-2.5 flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gold opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-gold ring-2 ring-canvas" />
+                </span>
+              )}
+            </button>
+
+            {isNotificationsOpen && (
+              <div className="absolute right-0 mt-2 w-80 bg-canvas border border-line rounded-[14px] shadow-lift overflow-hidden animate-fade-up origin-top-right">
+                <div className="p-4 border-b border-line flex items-center justify-between">
+                  <h3 className="text-[14px] font-semibold text-ink">Notifications</h3>
+                  {unreadCount > 0 && (
+                    <span className="text-[11px] font-medium text-gold bg-gold/10 px-2 py-0.5 rounded-full">
+                      {unreadCount} nouvelle{unreadCount > 1 ? "s" : ""}
+                    </span>
+                  )}
+                </div>
+                <NotificationList notifications={notifications} />
+                <div className="p-3 bg-surface/30 border-t border-line text-center">
+                  <button 
+                    onClick={() => setIsNotificationsOpen(false)}
+                    className="text-[11px] font-medium text-ink-soft hover:text-gold transition-colors"
+                  >
+                    Fermer
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* Avatar + logout */}
           <div className="flex items-center gap-3 ml-2 pl-4 border-l border-line">

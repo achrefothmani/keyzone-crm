@@ -12,6 +12,7 @@ import {
 import { notificationsApi, getToken } from "./api";
 import { useAuth } from "./auth";
 import type { Notification } from "./types";
+import { mutate } from "swr";
 
 type NotificationContextValue = {
   notifications: Notification[];
@@ -71,8 +72,17 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
         ws.onmessage = (event) => {
           try {
-            const newNotification: Notification = JSON.parse(event.data);
-            setNotifications((prev) => [newNotification, ...prev]);
+            const data = JSON.parse(event.data);
+            
+            // Handle different message types
+            if (data.type === "STATS_UPDATE") {
+              // Trigger revalidation of dashboard stats
+              void mutate("dashboard-stats");
+            } else {
+              // Standard notification message
+              const newNotification: Notification = data;
+              setNotifications((prev) => [newNotification, ...prev]);
+            }
           } catch (error) {
             console.error("Failed to parse websocket message:", error);
           }

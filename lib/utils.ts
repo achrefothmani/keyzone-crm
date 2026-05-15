@@ -23,8 +23,13 @@ export function formatDate(value: string) {
 
 export function formatRelative(value: string) {
   const diff = (Date.now() - new Date(value).getTime()) / 1000;
+  const minute = 60;
+  const hour = 3600;
   const day = 86400;
-  if (diff < day) return "aujourd’hui";
+
+  if (diff < minute) return "à l'instant";
+  if (diff < hour) return `il y a ${Math.floor(diff / minute)} min`;
+  if (diff < day) return `il y a ${Math.floor(diff / hour)} h`;
   if (diff < day * 2) return "hier";
   if (diff < day * 7) return `il y a ${Math.floor(diff / day)} jours`;
   return formatDate(value);
